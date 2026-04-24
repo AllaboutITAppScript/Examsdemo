@@ -8,7 +8,6 @@
     <script src="https://static.line-scdn.net/liff/edge/2/sdk.js"></script>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <!-- Noto Sans Thai: อ่านง่าย เป็นทางการ + Prompt สำหรับหัวข้อ -->
     <link href="https://fonts.googleapis.com/css2?family=Prompt:wght@300;400;500;600;700&family=Noto+Sans+Thai:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
     <style>
@@ -43,14 +42,12 @@
             line-height: 1.6;
         }
 
-        /* ── Typography ─────────────────────────────────────── */
         h1, h2, h3, .heading {
             font-family: 'Prompt', 'Noto Sans Thai', sans-serif;
             font-weight: 600;
             letter-spacing: -0.01em;
         }
 
-        /* ── Background mesh ────────────────────────────────── */
         body::before {
             content: '';
             position: fixed;
@@ -62,7 +59,6 @@
             z-index: 0;
         }
 
-        /* ── Card ───────────────────────────────────────────── */
         .card {
             background: var(--surface);
             border: 1px solid var(--border);
@@ -82,7 +78,6 @@
         }
         .card:hover { border-color: var(--border2); }
 
-        /* ── Input ──────────────────────────────────────────── */
         .inp {
             background: var(--bg2);
             border: 1.5px solid var(--border);
@@ -105,7 +100,6 @@
         select.inp { cursor: pointer; }
         textarea.inp { resize: vertical; min-height: 64px; }
 
-        /* ── Buttons ────────────────────────────────────────── */
         .btn {
             display: flex;
             align-items: center;
@@ -161,7 +155,6 @@
             margin: 0;
         }
 
-        /* ── Tabs ───────────────────────────────────────────── */
         .tab-bar {
             display: flex;
             background: var(--surface);
@@ -195,7 +188,6 @@
             border-bottom-color: var(--green) !important;
         }
 
-        /* ── Header ─────────────────────────────────────────── */
         .app-header {
             background: linear-gradient(160deg, #0a2016 0%, #081a10 60%, var(--bg) 100%);
             border-bottom: 1px solid rgba(6,199,85,0.15);
@@ -222,7 +214,6 @@
         }
         .avatar-ring img { width: 100%; height: 100%; object-fit: cover; }
 
-        /* ── Label ──────────────────────────────────────────── */
         .lbl {
             display: block;
             font-family: 'Prompt', sans-serif;
@@ -234,7 +225,6 @@
             margin-bottom: 7px;
         }
 
-        /* ── Badge ──────────────────────────────────────────── */
         .badge {
             display: inline-flex;
             align-items: center;
@@ -248,8 +238,8 @@
         .badge-green { background: rgba(6,199,85,0.15); color: var(--green); border: 1px solid rgba(6,199,85,0.3); }
         .badge-red   { background: rgba(239,68,68,0.12); color: #f87171; border: 1px solid rgba(239,68,68,0.25); }
         .badge-gray  { background: var(--surface2); color: var(--text2); border: 1px solid var(--border); }
+        .badge-orange { background: rgba(249,115,22,0.12); color: #fb923c; border: 1px solid rgba(249,115,22,0.25); }
 
-        /* ── Option row (radio) ──────────────────────────────── */
         .opt-row {
             display: flex;
             align-items: center;
@@ -267,17 +257,14 @@
         .opt-row .inp { margin: 0; background: transparent; border: none; padding: 0; box-shadow: none; }
         .opt-row .inp:focus { box-shadow: none; }
 
-        /* ── Separator ──────────────────────────────────────── */
         .sep {
             height: 1px;
             background: linear-gradient(90deg, transparent, var(--border), transparent);
             margin: 16px 0;
         }
 
-        /* ── Overlays ───────────────────────────────────────── */
         .hidden { display: none !important; }
 
-        /* Loading screen */
         #loadingScreen {
             display: flex;
             align-items: center;
@@ -294,7 +281,6 @@
         }
         @keyframes spin { to { transform: rotate(360deg); } }
 
-        /* Inline loader */
         .loader {
             width: 36px; height: 36px;
             border: 3px solid var(--border);
@@ -304,7 +290,6 @@
             margin: 28px auto;
         }
 
-        /* Loading overlay */
         .loading-overlay {
             position: fixed; inset: 0;
             background: rgba(8,15,26,0.75);
@@ -324,7 +309,6 @@
             box-shadow: 0 24px 64px rgba(0,0,0,0.6), 0 0 0 1px rgba(6,199,85,0.1);
         }
 
-        /* Success overlay */
         .success-overlay {
             position: fixed; inset: 0;
             background: rgba(8,15,26,0.8);
@@ -364,7 +348,6 @@
             50%       { box-shadow: 0 0 0 18px rgba(6,199,85,0); }
         }
 
-        /* Toast */
         .toast {
             position: fixed;
             bottom: 24px; left: 16px; right: 16px;
@@ -386,7 +369,6 @@
         }
         .toast-show { opacity: 1 !important; transform: translateY(0) !important; }
 
-        /* ── Question card header ────────────────────────────── */
         .q-header {
             display: flex;
             align-items: center;
@@ -404,7 +386,6 @@
             font-weight: 700;
         }
 
-        /* ── Empty state ────────────────────────────────────── */
         .empty {
             text-align: center;
             padding: 52px 24px;
@@ -413,15 +394,45 @@
         .empty i { font-size: 40px; margin-bottom: 14px; display: block; opacity: 0.5; }
         .empty p { font-size: 14px; }
 
-        /* ── Scrollbar ──────────────────────────────────────── */
         ::-webkit-scrollbar { width: 4px; }
         ::-webkit-scrollbar-track { background: transparent; }
         ::-webkit-scrollbar-thumb { background: var(--border2); border-radius: 4px; }
+
+        /* สไตล์สำหรับหมวดหมู่ */
+        .category-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 14px 0;
+            border-bottom: 1px solid var(--border);
+        }
+        .category-item:last-child { border-bottom: none; }
+        .category-info {
+            flex: 1;
+            min-width: 0;
+        }
+        .category-name {
+            font-weight: 700;
+            font-size: 16px;
+            color: var(--text);
+            margin-bottom: 4px;
+        }
+        .category-detail {
+            font-size: 12px;
+            color: var(--text2);
+            display: flex;
+            gap: 12px;
+            flex-wrap: wrap;
+        }
+        .category-actions {
+            display: flex;
+            gap: 8px;
+            flex-shrink: 0;
+        }
     </style>
 </head>
 <body>
 
-    <!-- ════ Loading Screen ════ -->
     <div id="loadingScreen">
         <div style="text-align:center;padding:24px">
             <div class="ring-spinner"></div>
@@ -430,10 +441,8 @@
         </div>
     </div>
 
-    <!-- ════ Main App ════ -->
     <div id="mainApp" class="hidden" style="max-width:480px;margin:0 auto;min-height:100vh;position:relative;z-index:1">
 
-        <!-- Header -->
         <div class="app-header">
             <div style="display:flex;justify-content:space-between;align-items:center;gap:12px">
                 <div style="display:flex;align-items:center;gap:14px;flex:1;min-width:0">
@@ -451,13 +460,15 @@
             </div>
         </div>
 
-        <!-- Tab bar -->
         <div class="tab-bar">
             <div class="tab tab-on" onclick="switchTab('create')" id="tabCreate">
                 <i class="fa-solid fa-plus-circle"></i>สร้าง
             </div>
             <div class="tab" onclick="switchTab('manage')" id="tabManage">
                 <i class="fa-solid fa-list-check"></i>จัดการ
+            </div>
+            <div class="tab" onclick="switchTab('categories')" id="tabCategories">
+                <i class="fa-solid fa-folder-tree"></i>หมวดหมู่
             </div>
             <div class="tab" onclick="switchTab('config')" id="tabConfig">
                 <i class="fa-solid fa-sliders"></i>ตั้งค่า
@@ -467,11 +478,9 @@
             </div>
         </div>
 
-        <!-- Content -->
         <div id="tabContent" style="padding:16px 14px 32px"></div>
     </div>
 
-    <!-- ════ Loading Overlay ════ -->
     <div id="loadingOverlay" class="loading-overlay">
         <div class="loading-box">
             <div class="ring-spinner"></div>
@@ -480,7 +489,6 @@
         </div>
     </div>
 
-    <!-- ════ Success Overlay ════ -->
     <div id="successOverlay" class="success-overlay">
         <div class="success-box">
             <div class="success-icon-wrap">
@@ -494,7 +502,6 @@
         </div>
     </div>
 
-    <!-- ════ Toast ════ -->
     <div id="toast" class="toast">
         <i id="toastIcon" class="fa-solid fa-circle-info" style="flex-shrink:0"></i>
         <span id="toastMsg"></span>
@@ -505,7 +512,6 @@
         const API_URL  = 'https://script.google.com/macros/s/AKfycbzENEQQ1KmDwIgXitXpef_xNlXbDiBWcVai60WRVqTkP_zP_6iyXwa9shWCzEOxX4Bs/exec';
         let user = null, questionCount = 0, toastTimer = null;
 
-        // ════ INIT ════
         async function init() {
             try {
                 updateStatus('กำลังเริ่มต้น LIFF...');
@@ -514,7 +520,6 @@
                 user = await liff.getProfile();
                 document.getElementById('userDisplayName').textContent = user.displayName;
 
-                // แสดง avatar ถ้ามี
                 if (user.pictureUrl) {
                     document.getElementById('avatarWrap').innerHTML = '<img src="' + user.pictureUrl + '" alt="">';
                 }
@@ -570,9 +575,8 @@
             toastTimer = setTimeout(function() { toast.classList.remove('toast-show'); }, 3000);
         }
 
-        // ════ TABS ════
         function switchTab(tab) {
-            ['create','manage','config','admins'].forEach(function(t) {
+            ['create','manage','categories','config','admins'].forEach(function(t) {
                 var id = 'tab' + t.charAt(0).toUpperCase() + t.slice(1);
                 var el = document.getElementById(id);
                 if (el) el.classList.remove('tab-on');
@@ -595,7 +599,7 @@
                     <button class="btn btn-b" onclick="addQuestion()"><i class="fa-solid fa-plus"></i> เพิ่มคำถาม</button>
                     <button class="btn btn-g" onclick="saveAllQuestions()" id="saveBtn"><i class="fa-solid fa-floppy-disk"></i> บันทึกข้อสอบทั้งหมด</button>
                 `;
-                loadCategories();
+                loadCategoriesSelect();
                 addQuestion();
 
             } else if (tab === 'manage') {
@@ -608,8 +612,40 @@
                     </div>
                     <div id="questionsList"><div class="loader"></div></div>
                 `;
-                loadCategories();
+                loadCategoriesFilter();
                 loadQuestions();
+
+            } else if (tab === 'categories') {
+                c.innerHTML = `
+                    <div class="card">
+                        <h3 class="heading" style="font-size:17px;margin-bottom:18px;color:var(--text)">
+                            <i class="fa-solid fa-plus-circle" style="color:var(--green)"></i> เพิ่มหมวดหมู่ใหม่
+                        </h3>
+                        <label class="lbl">ชื่อหมวดหมู่ *</label>
+                        <input type="text" id="newCategoryName" class="inp" placeholder="เช่น: การงานอาชีพ">
+                        <label class="lbl">รหัสหมวด (ตัวย่อ)</label>
+                        <input type="text" id="newCategoryCode" class="inp" placeholder="เช่น: CAREER">
+                        <label class="lbl">เกณฑ์ผ่าน (%)</label>
+                        <input type="number" id="newCategoryPass" class="inp" value="60" min="0" max="100">
+                        <label class="lbl">รูปแบบการแสดงผล</label>
+                        <select id="newCategoryDisplayType" class="inp">
+                            <option value="flex">Flex Message (ปุ่ม)</option>
+                            <option value="text">Text + Quick Reply</option>
+                        </select>
+                        <label class="lbl">จำนวนข้อต่อครั้ง</label>
+                        <input type="number" id="newCategoryLimit" class="inp" value="10" min="1" max="50">
+                        <button class="btn btn-g" onclick="addNewCategory()">
+                            <i class="fa-solid fa-save"></i> สร้างหมวดหมู่
+                        </button>
+                    </div>
+                    <div class="card">
+                        <h3 class="heading" style="font-size:17px;margin-bottom:18px;color:var(--text)">
+                            <i class="fa-solid fa-list" style="color:var(--green)"></i> รายการหมวดหมู่ทั้งหมด
+                        </h3>
+                        <div id="categoriesList"><div class="loader"></div></div>
+                    </div>
+                `;
+                loadAllCategories();
 
             } else if (tab === 'config') {
                 c.innerHTML = `
@@ -622,7 +658,7 @@
                         <label class="lbl" style="margin-top:4px">รูปแบบการแสดงผล</label>
                         <select id="configDisplayType" class="inp">
                             <option value="flex">Flex Message (ปุ่ม)</option>
-                            <option value="quickReply">Quick Reply (ด้านล่าง)</option>
+                            <option value="text">Text + Quick Reply</option>
                         </select>
                         <label class="lbl" style="margin-top:4px">จำนวนข้อต่อครั้ง</label>
                         <input type="number" id="configLimit" class="inp" value="10" min="1" max="50">
@@ -633,7 +669,7 @@
                         </button>
                     </div>
                 `;
-                loadCategories();
+                loadCategoriesConfig();
 
             } else if (tab === 'admins') {
                 c.innerHTML = `
@@ -659,24 +695,34 @@
             }
         }
 
-        // ════ CATEGORIES ════
-        async function loadCategories() {
+        // ==================== CATEGORIES ====================
+        async function loadCategoriesSelect() {
             try {
-                const r    = await fetch(API_URL + '?action=getCategories');
+                const r = await fetch(API_URL + '?action=getCategories');
                 const cats = await r.json();
-
                 var opts = cats.map(function(c) {
                     return '<option value="' + c.name + '">' + c.name + ' (' + (c.questionCount || 0) + ' ข้อ)</option>';
                 }).join('');
-
                 var cs = document.getElementById('categorySelect');
                 if (cs) cs.innerHTML = '<option value="">-- เลือกหมวดหมู่ --</option>' + opts;
+            } catch(e) { console.error(e); }
+        }
 
+        async function loadCategoriesFilter() {
+            try {
+                const r = await fetch(API_URL + '?action=getCategories');
+                const cats = await r.json();
                 var fs = document.getElementById('filterCategory');
                 if (fs) fs.innerHTML = '<option value="all">ทุกหมวด</option>' + cats.map(function(c) {
                     return '<option value="' + c.name + '">' + c.name + '</option>';
                 }).join('');
+            } catch(e) { console.error(e); }
+        }
 
+        async function loadCategoriesConfig() {
+            try {
+                const r = await fetch(API_URL + '?action=getCategories');
+                const cats = await r.json();
                 var cf = document.getElementById('configCategory');
                 if (cf) {
                     cf.innerHTML = '<option value="">-- เลือกหมวด --</option>' + cats.map(function(c) {
@@ -685,23 +731,171 @@
                     cf.onchange = function() {
                         var sel = cats.find(function(x) { return x.name === cf.value; });
                         if (sel) {
-                            document.getElementById('configDisplayType').value = sel.displayType    || 'flex';
-                            document.getElementById('configLimit').value        = sel.limitPerSession || 10;
-                            document.getElementById('configPass').value         = sel.passScore       || 50;
+                            document.getElementById('configDisplayType').value = sel.displayType || 'flex';
+                            document.getElementById('configLimit').value = sel.limitPerSession || 10;
+                            document.getElementById('configPass').value = sel.passScore || 50;
                         }
                     };
                 }
-            } catch(e) { console.error('loadCategories:', e); }
+            } catch(e) { console.error(e); }
         }
 
-        // ════ CREATE / QUESTION FORM ════
+        async function loadAllCategories() {
+            var container = document.getElementById('categoriesList');
+            if (!container) return;
+            container.innerHTML = '<div class="loader"></div>';
+            try {
+                const r = await fetch(API_URL + '?action=getCategories');
+                const cats = await r.json();
+                if (cats.length === 0) {
+                    container.innerHTML = '<div class="empty"><i class="fa-solid fa-folder-open"></i><p>ยังไม่มีหมวดหมู่</p><p style="font-size:12px;margin-top:6px">กด + สร้างหมวดหมู่ด้านบน</p></div>';
+                    return;
+                }
+                container.innerHTML = cats.map(function(cat) {
+                    return `
+                        <div class="category-item">
+                            <div class="category-info">
+                                <div class="category-name">
+                                    <i class="fa-solid fa-folder" style="color:var(--green);margin-right:8px"></i>
+                                    ${cat.name}
+                                    ${cat.code ? '<span class="badge badge-gray" style="margin-left:8px">' + cat.code + '</span>' : ''}
+                                </div>
+                                <div class="category-detail">
+                                    <span><i class="fa-solid fa-question-circle"></i> ${cat.questionCount || 0} ข้อ</span>
+                                    <span><i class="fa-solid fa-chart-line"></i> ผ่าน ${cat.passScore || 50}%</span>
+                                    <span><i class="fa-solid fa-display"></i> ${cat.displayType === 'flex' ? 'Flex' : 'Text'}</span>
+                                    <span><i class="fa-solid fa-list-ol"></i> ${cat.limitPerSession || 10} ข้อ/ครั้ง</span>
+                                </div>
+                            </div>
+                            <div class="category-actions">
+                                <button class="btn btn-o btn-sm" onclick="editCategory('${cat.name}')" style="padding:6px 12px">
+                                    <i class="fa-solid fa-pen"></i>
+                                </button>
+                                <button class="btn btn-r btn-sm" onclick="deleteCategory('${cat.name}')" style="padding:6px 12px">
+                                    <i class="fa-solid fa-trash"></i>
+                                </button>
+                            </div>
+                        </div>
+                    `;
+                }).join('');
+            } catch(e) {
+                container.innerHTML = '<div class="empty"><i class="fa-solid fa-triangle-exclamation"></i><p>โหลดข้อมูลไม่สำเร็จ</p></div>';
+            }
+        }
+
+        async function addNewCategory() {
+            var name = document.getElementById('newCategoryName').value.trim();
+            if (!name) { showToast('กรุณากรอกชื่อหมวดหมู่', 'warning'); return; }
+            
+            showLoading('กำลังสร้างหมวดหมู่...', name);
+            
+            var params = new URLSearchParams();
+            params.append('action', 'saveCategory');
+            params.append('name', name);
+            params.append('code', document.getElementById('newCategoryCode').value.trim());
+            params.append('passScore', document.getElementById('newCategoryPass').value);
+            params.append('displayType', document.getElementById('newCategoryDisplayType').value);
+            params.append('limitPerSession', document.getElementById('newCategoryLimit').value);
+            
+            try {
+                var r = await fetch(API_URL + '?' + params.toString());
+                var d = await r.json();
+                hideLoading();
+                if (d.success) {
+                    showSuccess('สร้างหมวดหมู่ <strong>' + name + '</strong> เรียบร้อยแล้ว!');
+                    document.getElementById('newCategoryName').value = '';
+                    document.getElementById('newCategoryCode').value = '';
+                    await loadAllCategories();
+                    await loadCategoriesSelect();
+                    await loadCategoriesFilter();
+                    await loadCategoriesConfig();
+                } else {
+                    showToast('บันทึกไม่สำเร็จ', 'error');
+                }
+            } catch(e) {
+                hideLoading();
+                showToast('เกิดข้อผิดพลาด: ' + e.message, 'error');
+            }
+        }
+
+        async function editCategory(name) {
+            var newName = prompt('แก้ไขชื่อหมวดหมู่', name);
+            if (!newName || newName === name) return;
+            
+            showLoading('กำลังอัปเดตหมวดหมู่...', newName);
+            var params = new URLSearchParams();
+            params.append('action', 'saveCategory');
+            params.append('name', newName);
+            params.append('oldName', name);
+            params.append('code', '');
+            
+            try {
+                var r = await fetch(API_URL + '?' + params.toString());
+                var d = await r.json();
+                hideLoading();
+                if (d.success) {
+                    showSuccess('อัปเดตหมวดหมู่เป็น <strong>' + newName + '</strong> เรียบร้อย!');
+                    await loadAllCategories();
+                    await loadCategoriesSelect();
+                    await loadCategoriesFilter();
+                    await loadCategoriesConfig();
+                } else {
+                    showToast('อัปเดตไม่สำเร็จ', 'error');
+                }
+            } catch(e) {
+                hideLoading();
+                showToast('เกิดข้อผิดพลาด: ' + e.message, 'error');
+            }
+        }
+
+        async function deleteCategory(name) {
+            var qs = await getQsFromCategory(name);
+            if (qs.length > 0) {
+                if (!confirm('หมวดหมู่ ' + name + ' มีข้อสอบอยู่ ' + qs.length + ' ข้อ\nถ้าลบหมวดนี้ ข้อสอบจะยังคงอยู่แต่จะไม่แสดงในเมนู\nยืนยันการลบ?')) return;
+            } else {
+                if (!confirm('ยืนยันการลบหมวดหมู่ ' + name + '?')) return;
+            }
+            
+            showLoading('กำลังลบหมวดหมู่...', name);
+            var params = new URLSearchParams();
+            params.append('action', 'deleteCategory');
+            params.append('name', name);
+            
+            try {
+                var r = await fetch(API_URL + '?' + params.toString());
+                var d = await r.json();
+                hideLoading();
+                if (d.success) {
+                    showSuccess('ลบหมวดหมู่ <strong>' + name + '</strong> เรียบร้อย!');
+                    await loadAllCategories();
+                    await loadCategoriesSelect();
+                    await loadCategoriesFilter();
+                    await loadCategoriesConfig();
+                } else {
+                    showToast('ลบไม่สำเร็จ', 'error');
+                }
+            } catch(e) {
+                hideLoading();
+                showToast('เกิดข้อผิดพลาด: ' + e.message, 'error');
+            }
+        }
+
+        async function getQsFromCategory(cat) {
+            try {
+                var r = await fetch(API_URL + '?action=getQuestions&category=' + encodeURIComponent(cat));
+                var qs = await r.json();
+                return qs;
+            } catch(e) { return []; }
+        }
+
+        // ==================== CREATE / QUESTION FORM ====================
         function addQuestion(data) {
             data = data || {};
             var container = document.getElementById('questionsContainer');
             if (!container) return;
 
             var index = questionCount;
-            var card  = document.createElement('div');
+            var card = document.createElement('div');
             card.className = 'card question-card';
             card.setAttribute('data-index', index);
 
@@ -726,7 +920,6 @@
                 }).join('')}
                 ${data.id ? '<input type="hidden" class="q-id" value="' + data.id + '">' : ''}
             `;
-
             container.appendChild(card);
             questionCount++;
         }
@@ -750,23 +943,23 @@
 
             try {
                 for (var i = 0; i < cards.length; i++) {
-                    var card      = cards[i];
-                    var question  = card.querySelector('.q-text').value.trim();
-                    var radio     = card.querySelector('input[type="radio"]:checked');
-                    var qidEl     = card.querySelector('.q-id');
+                    var card = cards[i];
+                    var question = card.querySelector('.q-text').value.trim();
+                    var radio = card.querySelector('input[type="radio"]:checked');
+                    var qidEl = card.querySelector('.q-id');
 
                     if (!question) throw new Error('กรุณากรอกคำถามข้อที่ ' + (i+1));
-                    if (!radio)    throw new Error('กรุณาเลือกคำตอบที่ถูกต้องสำหรับข้อที่ ' + (i+1));
+                    if (!radio) throw new Error('กรุณาเลือกคำตอบที่ถูกต้องสำหรับข้อที่ ' + (i+1));
 
                     var params = new URLSearchParams();
-                    params.append('action',   'saveQuestion');
+                    params.append('action', 'saveQuestion');
                     params.append('category', cat.value);
                     params.append('question', question);
-                    params.append('correct',  radio.value);
-                    params.append('optionA',  card.querySelector('[data-opt="A"]').value.trim());
-                    params.append('optionB',  card.querySelector('[data-opt="B"]').value.trim());
-                    params.append('optionC',  card.querySelector('[data-opt="C"]').value.trim());
-                    params.append('optionD',  card.querySelector('[data-opt="D"]').value.trim());
+                    params.append('correct', radio.value);
+                    params.append('optionA', card.querySelector('[data-opt="A"]').value.trim());
+                    params.append('optionB', card.querySelector('[data-opt="B"]').value.trim());
+                    params.append('optionC', card.querySelector('[data-opt="C"]').value.trim());
+                    params.append('optionD', card.querySelector('[data-opt="D"]').value.trim());
                     if (qidEl) params.append('id', qidEl.value);
 
                     var r = await fetch(API_URL + '?' + params.toString());
@@ -780,21 +973,22 @@
                 questionCount = 0;
                 addQuestion();
                 cat.value = '';
-                await loadCategories();
+                await loadCategoriesSelect();
+                await loadAllCategories();
 
             } catch(e) { hideLoading(); showToast(e.message, 'error'); }
         }
 
-        // ════ MANAGE ════
+        // ==================== MANAGE ====================
         async function loadQuestions() {
             var container = document.getElementById('questionsList');
             if (!container) return;
             container.innerHTML = '<div class="loader"></div>';
 
             try {
-                var catEl    = document.getElementById('filterCategory');
+                var catEl = document.getElementById('filterCategory');
                 var category = catEl ? catEl.value : 'all';
-                var r        = await fetch(API_URL + '?action=getQuestions&category=' + encodeURIComponent(category));
+                var r = await fetch(API_URL + '?action=getQuestions&category=' + encodeURIComponent(category));
                 var questions = await r.json();
 
                 if (questions.length === 0) {
@@ -813,12 +1007,12 @@
                             </span>
                             <span class="badge badge-gray"><i class="fa-solid fa-folder"></i> ${q.category}</span>
                         </div>
-                        <p style="font-weight:600;font-size:15px;margin-bottom:10px;line-height:1.5;color:var(--text)">${q.question}</p>
+                        <p style="font-weight:600;font-size:15px;margin-bottom:10px;line-height:1.5;color:var(--text)">${escapeHtml(q.question)}</p>
                         <div style="font-size:13px;color:var(--text3);margin-bottom:10px;line-height:1.8">
-                            <span style="color:${q.correct==='A'?'var(--green)':'var(--text3)'}">A. ${q.option1}</span> &nbsp;
-                            <span style="color:${q.correct==='B'?'var(--green)':'var(--text3)'}">B. ${q.option2}</span><br>
-                            <span style="color:${q.correct==='C'?'var(--green)':'var(--text3)'}">C. ${q.option3}</span> &nbsp;
-                            <span style="color:${q.correct==='D'?'var(--green)':'var(--text3)'}">D. ${q.option4}</span>
+                            <span style="color:${q.correct==='A'?'var(--green)':'var(--text3)'}">A. ${escapeHtml(q.option1)}</span> &nbsp;
+                            <span style="color:${q.correct==='B'?'var(--green)':'var(--text3)'}">B. ${escapeHtml(q.option2)}</span><br>
+                            <span style="color:${q.correct==='C'?'var(--green)':'var(--text3)'}">C. ${escapeHtml(q.option3)}</span> &nbsp;
+                            <span style="color:${q.correct==='D'?'var(--green)':'var(--text3)'}">D. ${escapeHtml(q.option4)}</span>
                         </div>
                         <div style="font-size:12px;color:var(--green);margin-bottom:12px;font-weight:600">
                             <i class="fa-solid fa-check-circle"></i> เฉลย: ${q.correct}
@@ -841,48 +1035,66 @@
             }
         }
 
+        function escapeHtml(str) {
+            if (!str) return '';
+            return str.replace(/[&<>]/g, function(m) {
+                if (m === '&') return '&amp;';
+                if (m === '<') return '&lt;';
+                if (m === '>') return '&gt;';
+                return m;
+            });
+        }
+
         async function toggleQuestion(id, status) {
             var newStatus = status === 'active' ? 'inactive' : 'active';
             await fetch(API_URL + '?action=toggleQuestionStatus&questionId=' + id + '&status=' + newStatus);
             showToast(newStatus === 'active' ? 'เปิดใช้งานแล้ว' : 'ปิดใช้งานแล้ว', 'success');
-            loadQuestions(); loadCategories();
+            loadQuestions(); 
+            loadCategoriesSelect();
+            loadAllCategories();
         }
 
         async function deleteQuestion(id) {
             if (!confirm('ยืนยันการลบข้อสอบนี้?\nการลบจะไม่สามารถเรียกคืนได้')) return;
             await fetch(API_URL + '?action=deleteQuestion&questionId=' + id);
             showToast('ลบข้อสอบเรียบร้อย', 'success');
-            loadQuestions(); loadCategories();
+            loadQuestions(); 
+            loadCategoriesSelect();
+            loadAllCategories();
         }
 
-        // ════ CONFIG ════
+        // ==================== CONFIG ====================
         async function saveConfig() {
             var cat = document.getElementById('configCategory').value;
             if (!cat) { showToast('กรุณาเลือกหมวดข้อสอบ', 'warning'); return; }
             showLoading('กำลังบันทึกการตั้งค่า...', cat);
             var params = new URLSearchParams();
-            params.append('action',          'saveExamConfig');
-            params.append('category',        cat);
-            params.append('displayType',     document.getElementById('configDisplayType').value);
+            params.append('action', 'saveExamConfig');
+            params.append('category', cat);
+            params.append('displayType', document.getElementById('configDisplayType').value);
             params.append('limitPerSession', document.getElementById('configLimit').value);
-            params.append('passScore',       document.getElementById('configPass').value);
+            params.append('passScore', document.getElementById('configPass').value);
             try {
                 var r = await fetch(API_URL + '?' + params.toString());
                 var d = await r.json();
                 hideLoading();
-                if (d.success) { showSuccess('ตั้งค่าหมวด <strong>' + cat + '</strong> เรียบร้อยแล้ว!'); loadCategories(); }
-                else showToast(d.message || 'บันทึกไม่สำเร็จ', 'error');
+                if (d.success) { 
+                    showSuccess('ตั้งค่าหมวด <strong>' + cat + '</strong> เรียบร้อยแล้ว!'); 
+                    await loadCategoriesSelect();
+                    await loadAllCategories();
+                    await loadCategoriesConfig();
+                } else showToast(d.message || 'บันทึกไม่สำเร็จ', 'error');
             } catch(e) { hideLoading(); showToast('เกิดข้อผิดพลาด: ' + e.message, 'error'); }
         }
 
-        // ════ ADMINS ════
+        // ==================== ADMINS ====================
         async function loadUsers() {
             try {
-                var r     = await fetch(API_URL + '?action=getUsers');
+                var r = await fetch(API_URL + '?action=getUsers');
                 var users = await r.json();
-                var s     = document.getElementById('userSelect');
+                var s = document.getElementById('userSelect');
                 if (s) s.innerHTML = '<option value="">-- เลือกผู้ใช้ --</option>' +
-                    users.map(function(u) { return '<option value="' + u.userId + '">' + u.displayName + '</option>'; }).join('');
+                    users.map(function(u) { return '<option value="' + u.userId + '">' + escapeHtml(u.displayName) + '</option>'; }).join('');
             } catch(e) {}
         }
 
@@ -891,7 +1103,7 @@
             if (!c) return;
             c.innerHTML = '<div class="loader"></div>';
             try {
-                var r      = await fetch(API_URL + '?action=getAdmins');
+                var r = await fetch(API_URL + '?action=getAdmins');
                 var admins = await r.json();
                 if (admins.length === 0) {
                     c.innerHTML = '<div class="empty" style="padding:28px"><i class="fa-solid fa-user-slash"></i><p>ยังไม่มีแอดมิน</p></div>';
@@ -905,7 +1117,7 @@
                                 <i class="fa-solid fa-user" style="color:var(--green);font-size:14px"></i>
                             </div>
                             <div style="min-width:0">
-                                <div style="font-weight:600;color:var(--text);font-size:14px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${a.name}</div>
+                                <div style="font-weight:600;color:var(--text);font-size:14px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${escapeHtml(a.name)}</div>
                                 <div style="font-size:11px;color:var(--text3);font-family:Prompt,sans-serif">${a.role}</div>
                             </div>
                         </div>
