@@ -24,8 +24,8 @@
 
     <script>
         const LIFF_ID = '2008892438-qVn8tOFT';
-        // ⚠️ เปลี่ยนเป็น URL Google Script ของคุณ
-        const API = 'YOUR_SCRIPT_URL';
+        // ⚠️ เปลี่ยนตรงนี้!
+        const API = 'hhttps://script.google.com/macros/s/AKfycbzENEQQ1KmDwIgXitXpef_xNlXbDiBWcVai60WRVqTkP_zP_6iyXwa9shWCzEOxX4Bs/exec';
         let user = null;
 
         async function init() {
@@ -33,7 +33,7 @@
             if (!liff.isLoggedIn()) await liff.login();
             user = await liff.getProfile();
             
-            const r = await fetch(`${API}?action=checkAdmin&userId=${user.userId}`);
+            const r = await fetch(API + '?action=checkAdmin&userId=' + user.userId);
             const d = await r.json();
             if (!d.isAdmin) {
                 document.getElementById('app').innerHTML = '<div style="text-align:center;padding:40px"><h2>⛔ ไม่มีสิทธิ์</h2></div>';
@@ -46,9 +46,7 @@
 
         function render() {
             document.getElementById('app').innerHTML = `
-                <div class="bg-green" style="padding:24px;border-radius:0 0 24px 24px">
-                    <h1>📚 จัดการข้อสอบ</h1><p>👤 ${user.displayName}</p>
-                </div>
+                <div class="bg-green" style="padding:24px;border-radius:0 0 24px 24px"><h1>📚 จัดการข้อสอบ</h1><p>👤 ${user.displayName}</p></div>
                 <div style="display:flex;border-bottom:1px solid #334155">
                     <div class="tab tab-on" onclick="sw('create')" id="tCreate">➕ สร้าง</div>
                     <div class="tab" onclick="sw('manage')" id="tManage">📋 จัดการ</div>
@@ -61,8 +59,8 @@
 
         async function sw(tab) {
             document.querySelectorAll('.tab').forEach(t => { t.classList.remove('tab-on'); t.style.color = '#94a3b8'; });
-            document.getElementById('t' + tab.charAt(0).toUpperCase() + tab.slice(1)).classList.add('tab-on');
-            document.getElementById('t' + tab.charAt(0).toUpperCase() + tab.slice(1)).style.color = '#06C755';
+            const tEl = document.getElementById('t' + tab.charAt(0).toUpperCase() + tab.slice(1));
+            if (tEl) { tEl.classList.add('tab-on'); tEl.style.color = '#06C755'; }
             
             const c = document.getElementById('content');
             
@@ -79,11 +77,11 @@
         }
 
         async function loadCats() {
-            const r = await fetch(`${API}?action=getCategories`);
+            const r = await fetch(API + '?action=getCategories');
             const cats = await r.json();
             ['catSel', 'fCat', 'cfgCat'].forEach(id => {
                 const el = document.getElementById(id); if (!el) return;
-                el.innerHTML = (id === 'fCat' ? '<option value="all">ทุกหมวด</option>' : '<option value="">เลือกหมวด...</option>') + cats.map(c => `<option value="${c.name}">${c.name}</option>`).join('');
+                el.innerHTML = (id === 'fCat' ? '<option value="all">ทุกหมวด</option>' : '<option value="">เลือกหมวด...</option>') + cats.map(c => '<option value="' + c.name + '">' + c.name + '</option>').join('');
             });
             const cfgCat = document.getElementById('cfgCat');
             if (cfgCat) cfgCat.onchange = () => {
@@ -95,41 +93,50 @@
         function addQ() {
             const i = document.querySelectorAll('.qcard').length;
             const d = document.createElement('div'); d.className = 'card qcard';
-            d.innerHTML = `<b>ข้อ ${i+1}</b><textarea class="inp qt" rows="2" placeholder="คำถาม..."></textarea>${['A','B','C','D'].map(o => `<div style="display:flex;align-items:center;gap:8px"><input type="radio" name="c_${i}" value="${o}"><span>${o}.</span><input class="inp" placeholder="ตัวเลือก ${o}" data-o="${o}" style="margin:0"></div>`).join('')}<button class="btn btn-r" onclick="this.parentElement.remove()">🗑 ลบ</button>`;
+            d.innerHTML = '<b>ข้อ ' + (i+1) + '</b><textarea class="inp qt" rows="2" placeholder="คำถาม..."></textarea>' +
+                ['A','B','C','D'].map(o => '<div style="display:flex;align-items:center;gap:8px"><input type="radio" name="c_' + i + '" value="' + o + '"><span>' + o + '.</span><input class="inp" placeholder="ตัวเลือก ' + o + '" data-o="' + o + '" style="margin:0"></div>').join('') +
+                '<button class="btn btn-r" onclick="this.parentElement.remove()">🗑 ลบ</button>';
             document.getElementById('qBox').appendChild(d);
         }
 
         async function saveAll() {
             const cat = document.getElementById('catSel').value; if (!cat) return alert('เลือกหมวดก่อน!');
-            for (const c of document.querySelectorAll('.qcard')) {
+            const cards = document.querySelectorAll('.qcard');
+            for (const c of cards) {
                 const q = c.querySelector('.qt').value.trim();
                 const cor = c.querySelector('input[type="radio"]:checked');
                 if (!q || !cor) { alert('กรอกให้ครบ!'); return; }
-                const p = new URLSearchParams({ action: 'saveQuestion', category: cat, question: q, correct: cor.value });
-                ['A','B','C','D'].forEach(o => p.append('option' + o, c.querySelector(`[data-o="${o}"]`).value.trim()));
-                await fetch(`${API}?${p.toString()}`);
+                let url = API + '?action=saveQuestion&category=' + encodeURIComponent(cat) + '&question=' + encodeURIComponent(q) + '&correct=' + cor.value;
+                ['A','B','C','D'].forEach(o => url += '&option' + o + '=' + encodeURIComponent(c.querySelector('[data-o="' + o + '"]').value.trim()));
+                await fetch(url);
             }
             alert('✅ บันทึกแล้ว!'); document.getElementById('qBox').innerHTML = ''; addQ(); await loadCats();
         }
 
         async function loadM() {
             const cat = document.getElementById('fCat').value;
-            const r = await fetch(`${API}?action=getQuestions&category=${cat}`);
+            const r = await fetch(API + '?action=getQuestions&category=' + cat);
             const qs = await r.json();
-            document.getElementById('mList').innerHTML = qs.length === 0 ? '<p>📭 ไม่พบ</p>' : qs.map(q => `
-                <div class="card"><b>${q.question}</b><p style="color:#94a3b8">A. ${q.option1} | B. ${q.option2}<br>C. ${q.option3} | D. ${q.option4}</p><p style="color:#06C755">✅ ${q.correct} | ${q.status}</p>
-                <button class="btn btn-b" onclick="togQ('${q.id}','${q.status}')">${q.status==='active'?'ปิด':'เปิด'}</button>
-                <button class="btn btn-r" onclick="delQ('${q.id}')">ลบ</button></div>
-            `).join('');
+            document.getElementById('mList').innerHTML = qs.length === 0 ? '<p>📭 ไม่พบ</p>' : qs.map(q =>
+                '<div class="card"><b>' + q.question + '</b><p style="color:#94a3b8">A. ' + q.option1 + ' | B. ' + q.option2 + '<br>C. ' + q.option3 + ' | D. ' + q.option4 + '</p><p style="color:#06C755">✅ ' + q.correct + ' | ' + q.status + '</p>' +
+                '<button class="btn btn-b" onclick="togQ(\'' + q.id + '\',\'' + q.status + '\')">' + (q.status === 'active' ? 'ปิด' : 'เปิด') + '</button>' +
+                '<button class="btn btn-r" onclick="delQ(\'' + q.id + '\')">ลบ</button></div>'
+            ).join('');
         }
 
-        async function togQ(id, st) { await fetch(`${API}?action=toggleQuestionStatus&questionId=${id}&status=${st==='active'?'inactive':'active'}`); loadM(); loadCats(); }
-        async function delQ(id) { if (confirm('ลบ?')) { await fetch(`${API}?action=deleteQuestion&questionId=${id}`); loadM(); loadCats(); } }
+        async function togQ(id, st) {
+            await fetch(API + '?action=toggleQuestionStatus&questionId=' + id + '&status=' + (st === 'active' ? 'inactive' : 'active'));
+            loadM(); loadCats();
+        }
+        
+        async function delQ(id) {
+            if (confirm('ลบ?')) { await fetch(API + '?action=deleteQuestion&questionId=' + id); loadM(); loadCats(); }
+        }
 
         async function saveCfg() {
             const cat = document.getElementById('cfgCat').value; if (!cat) return alert('เลือกหมวด!');
-            const p = new URLSearchParams({ action: 'saveExamConfig', category: cat, displayType: document.getElementById('cfgType').value, limitPerSession: document.getElementById('cfgLimit').value, passScore: document.getElementById('cfgPass').value });
-            await fetch(`${API}?${p.toString()}`); alert('✅ บันทึกแล้ว!');
+            await fetch(API + '?action=saveExamConfig&category=' + encodeURIComponent(cat) + '&displayType=' + document.getElementById('cfgType').value + '&limitPerSession=' + document.getElementById('cfgLimit').value + '&passScore=' + document.getElementById('cfgPass').value);
+            alert('✅ บันทึกแล้ว!');
         }
 
         window.addEventListener('DOMContentLoaded', init);
