@@ -18,7 +18,7 @@
         .btn-r { background: #dc2626; color: white; }
         .btn-b { background: #334155; color: white; }
         .btn-o { background: #f97316; color: white; }
-        .tab { padding: 14px; text-align: center; cursor: pointer; flex: 1; color: #94a3b8; border-bottom: 3px solid transparent; transition: all 0.2s; }
+        .tab { padding: 14px 8px; text-align: center; cursor: pointer; flex: 1; color: #94a3b8; border-bottom: 3px solid transparent; transition: all 0.2s; font-size: 13px; }
         .tab-on { color: #06C755 !important; border-bottom: 3px solid #06C755 !important; font-weight: bold !important; }
         .hidden { display: none !important; }
         .toast { position: fixed; bottom: 20px; left: 20px; right: 20px; background: #1e293b; border: 1px solid #334155; color: white; padding: 16px; border-radius: 12px; text-align: center; z-index: 100; opacity: 0; transition: opacity 0.3s; }
@@ -54,10 +54,11 @@
         </div>
 
         <!-- Tab Navigation -->
-        <div style="display:flex;border-bottom:1px solid #334155;background:#1e293b">
+        <div style="display:flex;border-bottom:1px solid #334155;background:#1e293b;overflow-x:auto">
             <div class="tab tab-on" onclick="switchTab('create')" id="tabCreate">➕ สร้าง</div>
             <div class="tab" onclick="switchTab('manage')" id="tabManage">📋 จัดการ</div>
             <div class="tab" onclick="switchTab('config')" id="tabConfig">⚙️ ตั้งค่า</div>
+            <div class="tab" onclick="switchTab('admins')" id="tabAdmins">👑 แอดมิน</div>
         </div>
 
         <!-- Tab Content -->
@@ -74,7 +75,7 @@
         // ==================== CONFIG ====================
         const LIFF_ID = '2008892438-qVn8tOFT';
         // ⚠️⚠️⚠️ เปลี่ยนเป็น URL Google Script ของคุณ ⚠️⚠️⚠️
-        const API_URL = 'https://script.google.com/macros/s/AKfycbzENEQQ1KmDwIgXitXpef_xNlXbDiBWcVai60WRVqTkP_zP_6iyXwa9shWCzEOxX4Bs/exec';
+        const API_URL = 'https://script.google.com/macros/s/YOUR_SCRIPT_ID/exec';
         
         // ==================== STATE ====================
         let user = null;
@@ -158,7 +159,7 @@
         // ==================== TAB SWITCHING ====================
         function switchTab(tab) {
             // Reset all tabs
-            ['create', 'manage', 'config'].forEach(function(t) {
+            ['create', 'manage', 'config', 'admins'].forEach(function(t) {
                 var el = document.getElementById('tab' + t.charAt(0).toUpperCase() + t.slice(1));
                 if (el) { el.classList.remove('tab-on'); el.style.color = '#94a3b8'; }
             });
@@ -230,6 +231,30 @@
                     </div>
                 `;
                 loadCategories();
+            }
+            else if (tab === 'admins') {
+                // ✅ TAB ADMIN
+                content.innerHTML = `
+                    <div class="card">
+                        <h3 style="font-size:18px;margin-bottom:16px">👑 จัดการแอดมิน</h3>
+                        
+                        <label style="font-weight:bold;margin-bottom:8px;display:block">➕ เพิ่มแอดมินจากผู้ใช้</label>
+                        <select id="userSelect" class="inp">
+                            <option value="">-- เลือกผู้ใช้ --</option>
+                        </select>
+                        
+                        <button class="btn btn-g" onclick="addAdminUser()">➕ เพิ่มเป็นแอดมิน</button>
+                    </div>
+                    
+                    <div class="card">
+                        <h3 style="font-size:18px;margin-bottom:16px">📋 รายชื่อแอดมินปัจจุบัน</h3>
+                        <div id="adminsList">
+                            <div class="loader"></div>
+                        </div>
+                    </div>
+                `;
+                loadUsers();
+                loadAdmins();
             }
         }
 
@@ -378,7 +403,6 @@
                 
                 showToast('✅ บันทึกข้อสอบ ' + cards.length + ' ข้อเรียบร้อย!', 'success');
                 
-                // Reset form
                 document.getElementById('questionsContainer').innerHTML = '';
                 questionCount = 0;
                 addQuestion();
@@ -481,6 +505,99 @@
                     loadCategories();
                 } else {
                     showToast('❌ ' + (d.message || 'บันทึกไม่สำเร็จ'), 'error');
+                }
+            } catch(e) {
+                showToast('❌ เกิดข้อผิดพลาด', 'error');
+            }
+        }
+
+        // ==================== ADMIN MANAGEMENT ====================
+        async function loadUsers() {
+            try {
+                var r = await fetch(API_URL + '?action=getUsers');
+                var users = await r.json();
+                
+                var select = document.getElementById('userSelect');
+                if (select) {
+                    select.innerHTML = '<option value="">-- เลือกผู้ใช้ --</option>' + 
+                        users.map(function(u) { 
+                            return '<option value="' + u.userId + '">' + u.displayName + ' (' + u.userId + ')</option>'; 
+                        }).join('');
+                }
+            } catch(e) {
+                console.error('Load users error:', e);
+            }
+        }
+
+        async function loadAdmins() {
+            var container = document.getElementById('adminsList');
+            if (!container) return;
+            
+            container.innerHTML = '<div class="loader"></div>';
+            
+            try {
+                var r = await fetch(API_URL + '?action=getAdmins');
+                var admins = await r.json();
+                
+                if (admins.length === 0) {
+                    container.innerHTML = '<div style="text-align:center;padding:20px;color:#94a3b8">ไม่มีแอดมิน</div>';
+                    return;
+                }
+                
+                container.innerHTML = admins.map(function(a) {
+                    return `
+                        <div class="card" style="display:flex;justify-content:space-between;align-items:center">
+                            <div>
+                                <div style="font-weight:bold;color:white">${a.name}</div>
+                                <div style="font-size:12px;color:#94a3b8">${a.role}</div>
+                                <div style="font-size:11px;color:#64748b">${a.userId}</div>
+                            </div>
+                            <button class="btn btn-r" style="width:auto;padding:8px 16px;font-size:13px" onclick="removeAdminUser('${a.userId}')">
+                                🗑 ลบ
+                            </button>
+                        </div>
+                    `;
+                }).join('');
+                
+            } catch(e) {
+                container.innerHTML = '<div style="text-align:center;color:#ef4444">❌ เกิดข้อผิดพลาด</div>';
+            }
+        }
+
+        async function addAdminUser() {
+            var select = document.getElementById('userSelect');
+            if (!select || !select.value) {
+                showToast('กรุณาเลือกผู้ใช้ก่อน', 'warning');
+                return;
+            }
+            
+            try {
+                var r = await fetch(API_URL + '?action=addAdmin&userId=' + encodeURIComponent(select.value));
+                var d = await r.json();
+                
+                if (d.success) {
+                    showToast('✅ เพิ่มแอดมินเรียบร้อย!', 'success');
+                    loadAdmins();
+                } else {
+                    showToast('❌ ' + (d.message || 'เพิ่มไม่สำเร็จ'), 'error');
+                }
+            } catch(e) {
+                showToast('❌ เกิดข้อผิดพลาด', 'error');
+            }
+        }
+
+        async function removeAdminUser(uid) {
+            if (!confirm('ยืนยันการลบแอดมินนี้?')) return;
+            
+            try {
+                var r = await fetch(API_URL + '?action=removeAdmin&userId=' + uid);
+                var d = await r.json();
+                
+                if (d.success) {
+                    showToast('✅ ลบแอดมินเรียบร้อย!', 'success');
+                    loadAdmins();
+                } else {
+                    showToast('❌ ' + (d.message || 'ลบไม่สำเร็จ'), 'error');
                 }
             } catch(e) {
                 showToast('❌ เกิดข้อผิดพลาด', 'error');
