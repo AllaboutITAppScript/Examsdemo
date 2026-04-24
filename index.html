@@ -104,6 +104,20 @@
         <div class="text-center">
             <div class="loader mb-4" style="width: 48px; height: 48px; border-width: 4px;"></div>
             <p class="text-gray-600 font-medium">กำลังโหลดระบบ...</p>
+            <p id="debugInfo" class="text-xs text-gray-400 mt-2"></p>
+        </div>
+    </div>
+
+    <!-- Error Screen -->
+    <div id="errorScreen" class="hidden min-h-screen flex items-center justify-center p-8">
+        <div class="text-center max-w-sm">
+            <div class="text-7xl mb-6">⚠️</div>
+            <h1 class="text-2xl font-bold text-gray-800 mb-2">เกิดข้อผิดพลาด</h1>
+            <p id="errorMessage" class="text-gray-600 mb-6">ไม่สามารถโหลดระบบได้</p>
+            <button onclick="location.reload()" 
+                    class="gradient-bg text-white px-8 py-3 rounded-xl font-medium hover:shadow-lg transition-all">
+                ลองใหม่
+            </button>
         </div>
     </div>
 
@@ -152,7 +166,6 @@
 
         <!-- Tab 1: Create Exam -->
         <section id="tabCreate" class="p-4 fade-in">
-            <!-- Category -->
             <div class="mb-6">
                 <label class="block text-sm font-semibold mb-2 text-gray-700">
                     📂 เลือกหมวดหมู่ <span class="text-red-500">*</span>
@@ -162,16 +175,13 @@
                 </select>
             </div>
 
-            <!-- Questions Container -->
             <div id="questionsContainer" class="space-y-4"></div>
 
-            <!-- Add Question -->
             <button onclick="addQuestionCard()" 
                     class="w-full mt-4 p-4 border-2 border-dashed border-gray-300 rounded-xl text-gray-500 hover:border-line hover:text-line hover:bg-line-light transition-all duration-200 font-medium">
                 <span class="text-lg">+</span> เพิ่มคำถามอีกข้อ
             </button>
 
-            <!-- Save -->
             <button onclick="saveAllQuestions()" id="saveBtn"
                     class="w-full mt-6 gradient-bg text-white p-4 rounded-xl font-bold text-lg hover:shadow-lg transition-all duration-200 btn-press">
                 💾 บันทึกข้อสอบทั้งหมด
@@ -180,7 +190,6 @@
 
         <!-- Tab 2: Manage Exam -->
         <section id="tabManage" class="p-4 hidden">
-            <!-- Filters -->
             <div class="flex gap-2 mb-4">
                 <select id="filterCategoryM" onchange="loadQuestionList()" 
                         class="flex-1 p-3 border-2 border-gray-200 rounded-lg text-sm bg-white">
@@ -194,17 +203,14 @@
                 </select>
             </div>
 
-            <!-- Search -->
             <div class="mb-4">
                 <input type="text" id="searchInput" oninput="loadQuestionList()" 
                        placeholder="🔍 ค้นหาคำถาม..."
                        class="w-full p-3 border-2 border-gray-200 rounded-lg text-sm">
             </div>
 
-            <!-- Count -->
             <p id="questionCountDisplay" class="text-sm text-gray-500 mb-3"></p>
 
-            <!-- Questions List -->
             <div id="questionsList" class="space-y-3">
                 <div class="text-center py-12">
                     <div class="loader mb-3"></div>
@@ -223,32 +229,36 @@
 
     <script>
         // ========== CONFIG ==========
-        // ⚠️ ใส่ Google Apps Script Web App URL ของคุณที่นี่
-        const API_ENDPOINT = 'https://script.google.com/macros/s/AKfycbzENEQQ1KmDwIgXitXpef_xNlXbDiBWcVai60WRVqTkP_zP_6iyXwa9shWCzEOxX4Bs/exec';
-        
-        // ⚠️ ใส่ LIFF ID ของคุณที่นี่
+        // ✅ แก้ไข LIFF ID ให้ถูกต้อง (ลบเลข 2 ที่เกินออก)
         const LIFF_ID = '2008892438-qVn8tOFT';
+        
+        // ✅ Google Apps Script Web App URL
+        const API_ENDPOINT = 'https://script.google.com/macros/s/AKfycbzENEQQ1KmDwIgXitXpef_xNlXbDiBWcVai60WRVqTkP_zP_6iyXwa9shWCzEOxX4Bs/exec';
 
         // ========== STATE ==========
         let currentUser = null;
         let isAdmin = false;
         let questionCounter = 0;
         let toastTimeout = null;
-        let allQuestions = []; // Cache สำหรับ tab manage
 
         // ========== INITIALIZATION ==========
         async function initApp() {
             try {
+                updateDebug('กำลังเริ่มต้น LIFF...');
+                
                 // 1. Init LIFF
                 await liff.init({ liffId: LIFF_ID });
+                updateDebug('LIFF initialized');
                 
                 // 2. Login if needed
                 if (!liff.isLoggedIn()) {
+                    updateDebug('กำลังล็อกอิน...');
                     await liff.login();
                 }
                 
                 // 3. Get profile
                 currentUser = await liff.getProfile();
+                updateDebug(`User: ${currentUser.displayName}`);
                 document.getElementById('userDisplayName').textContent = 
                     `👤 ${currentUser.displayName}`;
                 
@@ -256,52 +266,79 @@
                 await checkAndRequestFriendship();
                 
                 // 5. Verify admin
+                updateDebug('กำลังตรวจสอบสิทธิ์...');
                 isAdmin = await verifyAdminStatus();
                 
                 if (!isAdmin) {
+                    updateDebug('ไม่ใช่แอดมิน');
                     showAccessDenied();
                     return;
                 }
                 
+                updateDebug('เป็นแอดมิน - กำลังโหลดข้อมูล...');
+                
                 // 6. Load data & show app
                 await loadCategories();
-                addQuestionCard(); // First empty question
+                addQuestionCard();
                 showMainApp();
                 
             } catch (error) {
                 console.error('Init error:', error);
-                hideLoadingScreen();
-                showToast('❌ เกิดข้อผิดพลาด: ' + error.message, 'error');
+                updateDebug(`Error: ${error.message}`);
+                showError(error.message);
             }
+        }
+
+        function updateDebug(msg) {
+            const debugEl = document.getElementById('debugInfo');
+            if (debugEl) {
+                debugEl.textContent = msg;
+            }
+            console.log('[DEBUG]', msg);
         }
 
         async function checkAndRequestFriendship() {
             try {
+                updateDebug('กำลังตรวจสอบ friendship...');
+                
+                if (!liff.isInClient()) {
+                    updateDebug('ไม่ได้อยู่ใน LIFF Browser - ข้าม friendship');
+                    return;
+                }
+                
                 const friendship = await liff.getFriendship();
+                updateDebug(`Friend status: ${friendship.friendFlag}`);
                 
                 if (!friendship.friendFlag) {
-                    // Show request friendship dialog (in-app)
+                    updateDebug('กำลังขอเพิ่มเพื่อน...');
                     await liff.requestFriendship();
                     
-                    // Verify after request
                     const verify = await liff.getFriendship();
+                    updateDebug(`หลังขอ: ${verify.friendFlag}`);
+                    
                     if (verify.friendFlag) {
                         showToast('✅ ขอบคุณที่เพิ่มเพื่อน! 🎉', 'success');
                     }
                 }
             } catch (error) {
-                console.error('Friendship check error:', error);
-                // Continue anyway - friendship is optional
+                console.error('Friendship error:', error);
+                updateDebug(`Friendship error: ${error.message}`);
             }
         }
 
         async function verifyAdminStatus() {
             try {
-                const response = await fetch(`${API_ENDPOINT}?action=checkAdmin&userId=${currentUser.userId}`);
+                const url = `${API_ENDPOINT}?action=checkAdmin&userId=${encodeURIComponent(currentUser.userId)}`;
+                updateDebug(`กำลังเรียก API: ${url}`);
+                
+                const response = await fetch(url);
                 const data = await response.json();
+                updateDebug(`Admin check result: ${JSON.stringify(data)}`);
+                
                 return data.isAdmin === true;
             } catch (error) {
                 console.error('Admin check error:', error);
+                updateDebug(`Admin check error: ${error.message}`);
                 return false;
             }
         }
@@ -311,15 +348,25 @@
             document.getElementById('loadingScreen').style.display = 'none';
         }
 
+        function showError(message) {
+            document.getElementById('loadingScreen').style.display = 'none';
+            document.getElementById('errorMessage').textContent = message;
+            document.getElementById('errorScreen').classList.remove('hidden');
+            document.getElementById('mainApp').classList.add('hidden');
+            document.getElementById('accessDenied').classList.add('hidden');
+        }
+
         function showAccessDenied() {
             hideLoadingScreen();
             document.getElementById('accessDenied').classList.remove('hidden');
             document.getElementById('mainApp').classList.add('hidden');
+            document.getElementById('errorScreen').classList.add('hidden');
         }
 
         function showMainApp() {
             hideLoadingScreen();
             document.getElementById('accessDenied').classList.add('hidden');
+            document.getElementById('errorScreen').classList.add('hidden');
             document.getElementById('mainApp').classList.remove('hidden');
         }
 
@@ -337,7 +384,6 @@
             const toastContent = document.getElementById('toastContent');
             const toastMessage = document.getElementById('toastMessage');
             
-            // Set color
             const colors = {
                 success: 'bg-green-600',
                 error: 'bg-red-600',
@@ -368,7 +414,6 @@
             const createContent = document.getElementById('tabCreate');
             const manageContent = document.getElementById('tabManage');
             
-            // Reset
             [createBtn, manageBtn].forEach(btn => {
                 btn.classList.remove('tab-active');
                 btn.classList.add('text-gray-500');
@@ -396,14 +441,12 @@
                 const response = await fetch(`${API_ENDPOINT}?action=getCategories`);
                 const categories = await response.json();
                 
-                // Populate Create tab
                 const createSelect = document.getElementById('categorySelect');
                 createSelect.innerHTML = '<option value="">-- เลือกหมวดข้อสอบ --</option>';
                 categories.forEach(cat => {
                     createSelect.innerHTML += `<option value="${cat.name}">${cat.name} (${cat.questionCount || 0} ข้อ)</option>`;
                 });
                 
-                // Populate Manage tab filter
                 const filterSelect = document.getElementById('filterCategoryM');
                 filterSelect.innerHTML = '<option value="all">📂 ทุกหมวดหมู่</option>';
                 categories.forEach(cat => {
@@ -416,7 +459,7 @@
             }
         }
 
-        // ========== QUESTION CARDS (CREATE TAB) ==========
+        // ========== QUESTION CARDS ==========
         function addQuestionCard(questionData = null) {
             const container = document.getElementById('questionsContainer');
             const index = questionCounter;
@@ -485,8 +528,6 @@
             cards.forEach((card, i) => {
                 card.dataset.index = i;
                 card.querySelector('.q-num').textContent = i + 1;
-                
-                // Update radio names
                 const radios = card.querySelectorAll('input[type="radio"]');
                 radios.forEach(r => r.name = `correct_${i}`);
             });
@@ -499,8 +540,6 @@
             
             if (!category) {
                 showToast('⚠️ กรุณาเลือกหมวดข้อสอบ', 'warning');
-                document.getElementById('categorySelect').classList.add('border-red-500');
-                setTimeout(() => document.getElementById('categorySelect').classList.remove('border-red-500'), 2000);
                 return;
             }
             
@@ -539,13 +578,11 @@
                 };
                 
                 if (id) qData.id = id;
-                
                 questions.push(qData);
             });
             
             if (!isValid) return;
             
-            // Show loading
             const saveBtn = document.getElementById('saveBtn');
             const originalHTML = saveBtn.innerHTML;
             saveBtn.innerHTML = '<span class="loader"></span> กำลังบันทึก...';
@@ -569,13 +606,11 @@
                 
                 showToast(`✅ บันทึกข้อสอบ ${questions.length} ข้อเรียบร้อย!`, 'success');
                 
-                // Reset form
                 document.getElementById('questionsContainer').innerHTML = '';
                 questionCounter = 0;
                 addQuestionCard();
                 document.getElementById('categorySelect').value = '';
                 
-                // Refresh categories
                 await loadCategories();
                 
             } catch (error) {
@@ -602,7 +637,6 @@
                 const response = await fetch(`${API_ENDPOINT}?action=getQuestions&category=${category}`);
                 let questions = await response.json();
                 
-                // Client-side filtering
                 if (status !== 'all') {
                     questions = questions.filter(q => q.status === status);
                 }
@@ -620,7 +654,6 @@
                         <div class="text-center py-12 bg-gray-50 rounded-xl">
                             <div class="text-5xl mb-4">📭</div>
                             <p class="text-gray-600 font-medium">ไม่พบข้อสอบ</p>
-                            <p class="text-gray-500 text-sm mt-2">ลองเปลี่ยนตัวกรอง หรือสร้างข้อสอบใหม่</p>
                         </div>
                     `;
                     return;
@@ -678,50 +711,41 @@
             }
         }
 
-        // ========== EDIT QUESTION ==========
+        // ========== EDIT / TOGGLE / DELETE ==========
         async function editExistingQuestion(id) {
-            // Find question in cache or fetch
-            let question = allQuestions.find(q => q.id === id);
-            
-            if (!question) {
+            try {
                 const response = await fetch(`${API_ENDPOINT}?action=getQuestions&category=all`);
                 const questions = await response.json();
-                question = questions.find(q => q.id === id);
+                const question = questions.find(q => q.id === id);
+                
+                if (!question) {
+                    showToast('❌ ไม่พบข้อสอบ', 'error');
+                    return;
+                }
+                
+                switchTab('create');
+                document.getElementById('questionsContainer').innerHTML = '';
+                questionCounter = 0;
+                document.getElementById('categorySelect').value = question.category;
+                
+                addQuestionCard({
+                    id: question.id,
+                    question: question.question,
+                    option1: question.option1,
+                    option2: question.option2,
+                    option3: question.option3,
+                    option4: question.option4,
+                    correct: question.correct,
+                    displayType: question.displayType,
+                    limitPerSession: question.limitPerSession
+                });
+                
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+            } catch (error) {
+                showToast('❌ เกิดข้อผิดพลาด', 'error');
             }
-            
-            if (!question) {
-                showToast('❌ ไม่พบข้อสอบที่ต้องการแก้ไข', 'error');
-                return;
-            }
-            
-            // Switch to create tab with this question
-            switchTab('create');
-            
-            // Clear existing
-            document.getElementById('questionsContainer').innerHTML = '';
-            questionCounter = 0;
-            
-            // Set category
-            document.getElementById('categorySelect').value = question.category;
-            
-            // Add question card with data
-            addQuestionCard({
-                id: question.id,
-                question: question.question,
-                option1: question.option1,
-                option2: question.option2,
-                option3: question.option3,
-                option4: question.option4,
-                correct: question.correct,
-                displayType: question.displayType,
-                limitPerSession: question.limitPerSession
-            });
-            
-            window.scrollTo({ top: 0, behavior: 'smooth' });
-            showToast('📝 กำลังแก้ไขข้อสอบ', 'info');
         }
 
-        // ========== TOGGLE STATUS ==========
         async function toggleStatus(id, currentStatus) {
             const newStatus = currentStatus === 'active' ? 'inactive' : 'active';
             
@@ -736,22 +760,19 @@
                 const result = await response.json();
                 
                 if (result.success) {
-                    showToast(`✅ ${newStatus === 'active' ? 'เปิด' : 'ปิด'}ใช้งานข้อสอบเรียบร้อย`, 'success');
+                    showToast(`✅ ${newStatus === 'active' ? 'เปิด' : 'ปิด'}ใช้งานเรียบร้อย`, 'success');
                     await loadQuestionList();
-                    await loadCategories(); // Refresh question count
+                    await loadCategories();
                 } else {
                     throw new Error(result.message);
                 }
             } catch (error) {
-                showToast('❌ เกิดข้อผิดพลาด: ' + error.message, 'error');
+                showToast('❌ ' + error.message, 'error');
             }
         }
 
-        // ========== DELETE ==========
         async function deleteById(id) {
-            if (!confirm('คุณแน่ใจหรือไม่ที่จะลบข้อสอบนี้?\nการกระทำนี้ไม่สามารถย้อนกลับได้')) return;
-            
-            showToast('⏳ กำลังลบ...', 'info');
+            if (!confirm('คุณแน่ใจหรือไม่ที่จะลบข้อสอบนี้?')) return;
             
             try {
                 const params = new URLSearchParams({
@@ -770,14 +791,13 @@
                     throw new Error(result.message);
                 }
             } catch (error) {
-                showToast('❌ เกิดข้อผิดพลาด: ' + error.message, 'error');
+                showToast('❌ ' + error.message, 'error');
             }
         }
 
         // ========== START ==========
         window.addEventListener('DOMContentLoaded', initApp);
 
-        // Refresh when tab becomes visible again
         document.addEventListener('visibilitychange', () => {
             if (document.visibilityState === 'visible' && isAdmin) {
                 loadCategories();
