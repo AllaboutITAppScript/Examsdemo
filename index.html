@@ -6,17 +6,17 @@
     <title>จัดการข้อสอบ</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://static.line-scdn.net/liff/edge/2/sdk.js"></script>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
     <style>
-        body { font-family: 'Kanit', sans-serif; background: #0f172a; color: #e2e8f0; }
-        .gradient-bg { background: linear-gradient(135deg, #06C755, #059b40); }
-        .card { background: #1e293b; border: 1px solid #334155; border-radius: 16px; padding: 20px; }
-        .input { background: #0f172a; border: 1px solid #334155; color: #e2e8f0; padding: 12px; border-radius: 12px; width: 100%; box-sizing: border-box; }
-        .btn { padding: 14px; border-radius: 12px; font-weight: bold; border: none; cursor: pointer; width: 100%; }
-        .btn-green { background: #06C755; color: white; }
-        .btn-red { background: #dc2626; color: white; }
-        .btn-gray { background: #334155; color: white; }
-        .tab-active { color: #06C755 !important; border-bottom: 3px solid #06C755 !important; font-weight: bold !important; }
+        body { font-family: sans-serif; background: #0f172a; color: #e2e8f0; margin: 0; }
+        .bg-green { background: #06C755; }
+        .card { background: #1e293b; border: 1px solid #334155; border-radius: 16px; padding: 20px; margin-bottom: 12px; }
+        .inp { background: #0f172a; border: 1px solid #334155; color: #e2e8f0; padding: 12px; border-radius: 12px; width: 100%; box-sizing: border-box; margin-bottom: 8px; }
+        .btn { padding: 14px; border-radius: 12px; font-weight: bold; border: none; cursor: pointer; width: 100%; margin-bottom: 8px; }
+        .btn-g { background: #06C755; color: white; }
+        .btn-r { background: #dc2626; color: white; }
+        .btn-b { background: #334155; color: white; }
+        .tab { padding: 14px; text-align: center; cursor: pointer; flex: 1; color: #94a3b8; }
+        .tab-on { color: #06C755; border-bottom: 3px solid #06C755; font-weight: bold; }
     </style>
 </head>
 <body>
@@ -24,9 +24,8 @@
 
     <script>
         const LIFF_ID = '2008892438-qVn8tOFT';
-        // ⚠️ เปลี่ยนเป็น URL Google Script
+        // ⚠️ เปลี่ยนเป็น URL Google Script ของคุณ
         const API = 'YOUR_SCRIPT_URL';
-        
         let user = null;
 
         async function init() {
@@ -34,187 +33,103 @@
             if (!liff.isLoggedIn()) await liff.login();
             user = await liff.getProfile();
             
-            // Check admin
             const r = await fetch(`${API}?action=checkAdmin&userId=${user.userId}`);
             const d = await r.json();
-            
             if (!d.isAdmin) {
                 document.getElementById('app').innerHTML = '<div style="text-align:center;padding:40px"><h2>⛔ ไม่มีสิทธิ์</h2></div>';
                 return;
             }
             
-            renderUI();
-            loadCategories();
+            render();
+            loadCats();
         }
 
-        function renderUI() {
+        function render() {
             document.getElementById('app').innerHTML = `
-                <div class="gradient-bg" style="padding:24px;border-radius:0 0 24px 24px">
-                    <h1>📚 จัดการข้อสอบ</h1>
-                    <p>👤 ${user.displayName}</p>
+                <div class="bg-green" style="padding:24px;border-radius:0 0 24px 24px">
+                    <h1>📚 จัดการข้อสอบ</h1><p>👤 ${user.displayName}</p>
                 </div>
                 <div style="display:flex;border-bottom:1px solid #334155">
-                    <div class="tab-active" style="flex:1;padding:14px;text-align:center;cursor:pointer" onclick="switchTab('create')">➕ สร้าง</div>
-                    <div style="flex:1;padding:14px;text-align:center;cursor:pointer;color:#94a3b8" onclick="switchTab('manage')" id="tabManage">📋 จัดการ</div>
-                    <div style="flex:1;padding:14px;text-align:center;cursor:pointer;color:#94a3b8" onclick="switchTab('config')" id="tabConfig">⚙️ ตั้งค่า</div>
+                    <div class="tab tab-on" onclick="sw('create')" id="tCreate">➕ สร้าง</div>
+                    <div class="tab" onclick="sw('manage')" id="tManage">📋 จัดการ</div>
+                    <div class="tab" onclick="sw('config')" id="tConfig">⚙️ ตั้งค่า</div>
                 </div>
                 <div id="content" style="padding:16px"></div>
             `;
-            switchTab('create');
+            sw('create');
         }
 
-        async function switchTab(tab) {
-            document.querySelectorAll('[onclick^="switchTab"]').forEach(el => {
-                el.classList.remove('tab-active');
-                el.style.color = '#94a3b8';
-            });
-            document.getElementById('tab' + tab.charAt(0).toUpperCase() + tab.slice(1)).classList.add('tab-active');
-            document.getElementById('tab' + tab.charAt(0).toUpperCase() + tab.slice(1)).style.color = '#06C755';
+        async function sw(tab) {
+            document.querySelectorAll('.tab').forEach(t => { t.classList.remove('tab-on'); t.style.color = '#94a3b8'; });
+            document.getElementById('t' + tab.charAt(0).toUpperCase() + tab.slice(1)).classList.add('tab-on');
+            document.getElementById('t' + tab.charAt(0).toUpperCase() + tab.slice(1)).style.color = '#06C755';
             
-            const content = document.getElementById('content');
+            const c = document.getElementById('content');
             
             if (tab === 'create') {
-                content.innerHTML = `
-                    <select id="catSelect" class="input" style="margin-bottom:12px"><option value="">เลือกหมวด...</option></select>
-                    <div id="qContainer"></div>
-                    <button class="btn btn-gray" onclick="addQ()" style="margin-top:8px">+ เพิ่มคำถาม</button>
-                    <button class="btn btn-green" onclick="saveAll()" style="margin-top:8px">💾 บันทึก</button>
-                `;
-                await loadCategories();
-                addQ();
+                c.innerHTML = `<select id="catSel" class="inp"><option value="">เลือกหมวด...</option></select><div id="qBox"></div><button class="btn btn-b" onclick="addQ()">+ เพิ่มคำถาม</button><button class="btn btn-g" onclick="saveAll()">💾 บันทึก</button>`;
+                await loadCats(); addQ();
             } else if (tab === 'manage') {
-                content.innerHTML = `
-                    <select id="filterCat" class="input" onchange="loadManage()" style="margin-bottom:12px"><option value="all">ทุกหมวด</option></select>
-                    <div id="manageList"></div>
-                `;
-                await loadCategories();
-                loadManage();
+                c.innerHTML = `<select id="fCat" class="inp" onchange="loadM()"><option value="all">ทุกหมวด</option></select><div id="mList"></div>`;
+                await loadCats(); loadM();
             } else if (tab === 'config') {
-                content.innerHTML = `
-                    <h3>⚙️ ตั้งค่าชุดข้อสอบ</h3>
-                    <select id="configCat" class="input" style="margin-bottom:8px"><option value="">เลือกหมวด...</option></select>
-                    <select id="configType" class="input" style="margin-bottom:8px"><option value="flex">📱 Flex Message</option><option value="quickReply">💬 Quick Reply</option></select>
-                    <input id="configLimit" class="input" type="number" value="10" placeholder="จำนวนข้อ" style="margin-bottom:8px">
-                    <input id="configPass" class="input" type="number" value="60" placeholder="% ผ่าน" style="margin-bottom:8px">
-                    <button class="btn btn-green" onclick="saveConfig()">💾 บันทึก</button>
-                `;
-                await loadCategories();
+                c.innerHTML = `<h3>⚙️ ตั้งค่าชุดข้อสอบ</h3><select id="cfgCat" class="inp"><option value="">เลือกหมวด...</option></select><select id="cfgType" class="inp"><option value="flex">📱 Flex</option><option value="quickReply">💬 Quick Reply</option></select><input id="cfgLimit" class="inp" type="number" value="10" placeholder="จำนวนข้อ"><input id="cfgPass" class="inp" type="number" value="60" placeholder="% ผ่าน"><button class="btn btn-g" onclick="saveCfg()">💾 บันทึก</button>`;
+                await loadCats();
             }
         }
 
-        async function loadCategories() {
+        async function loadCats() {
             const r = await fetch(`${API}?action=getCategories`);
             const cats = await r.json();
-            
-            ['catSelect', 'filterCat', 'configCat'].forEach(id => {
-                const el = document.getElementById(id);
-                if (!el) return;
-                const opts = id === 'filterCat' ? '<option value="all">ทุกหมวด</option>' : '<option value="">เลือกหมวด...</option>';
-                el.innerHTML = opts + cats.map(c => `<option value="${c.name}">${c.name}</option>`).join('');
+            ['catSel', 'fCat', 'cfgCat'].forEach(id => {
+                const el = document.getElementById(id); if (!el) return;
+                el.innerHTML = (id === 'fCat' ? '<option value="all">ทุกหมวด</option>' : '<option value="">เลือกหมวด...</option>') + cats.map(c => `<option value="${c.name}">${c.name}</option>`).join('');
             });
-            
-            // Config auto-fill
-            const configCat = document.getElementById('configCat');
-            if (configCat) {
-                configCat.onchange = () => {
-                    const c = cats.find(c => c.name === configCat.value);
-                    if (c) {
-                        document.getElementById('configType').value = c.displayType || 'flex';
-                        document.getElementById('configLimit').value = c.limitPerSession || 10;
-                        document.getElementById('configPass').value = c.passScore || 50;
-                    }
-                };
-            }
+            const cfgCat = document.getElementById('cfgCat');
+            if (cfgCat) cfgCat.onchange = () => {
+                const c = cats.find(x => x.name === cfgCat.value);
+                if (c) { document.getElementById('cfgType').value = c.displayType || 'flex'; document.getElementById('cfgLimit').value = c.limitPerSession || 10; document.getElementById('cfgPass').value = c.passScore || 50; }
+            };
         }
 
         function addQ() {
-            const i = document.querySelectorAll('.q-card').length;
-            const div = document.createElement('div');
-            div.className = 'card q-card';
-            div.style.marginBottom = '12px';
-            div.innerHTML = `
-                <b>ข้อ ${i+1}</b>
-                <textarea class="input q-text" rows="2" placeholder="คำถาม..." style="margin:8px 0"></textarea>
-                ${['A','B','C','D'].map(o => `
-                    <div style="display:flex;align-items:center;gap:8px;margin:4px 0">
-                        <input type="radio" name="c_${i}" value="${o}">
-                        <span>${o}.</span>
-                        <input class="input" placeholder="ตัวเลือก ${o}" data-opt="${o}" style="margin:0">
-                    </div>
-                `).join('')}
-                <button class="btn btn-red" onclick="this.parentElement.remove()" style="margin-top:8px">🗑 ลบ</button>
-            `;
-            document.getElementById('qContainer').appendChild(div);
+            const i = document.querySelectorAll('.qcard').length;
+            const d = document.createElement('div'); d.className = 'card qcard';
+            d.innerHTML = `<b>ข้อ ${i+1}</b><textarea class="inp qt" rows="2" placeholder="คำถาม..."></textarea>${['A','B','C','D'].map(o => `<div style="display:flex;align-items:center;gap:8px"><input type="radio" name="c_${i}" value="${o}"><span>${o}.</span><input class="inp" placeholder="ตัวเลือก ${o}" data-o="${o}" style="margin:0"></div>`).join('')}<button class="btn btn-r" onclick="this.parentElement.remove()">🗑 ลบ</button>`;
+            document.getElementById('qBox').appendChild(d);
         }
 
         async function saveAll() {
-            const cat = document.getElementById('catSelect').value;
-            if (!cat) return alert('เลือกหมวดก่อน!');
-            
-            const cards = document.querySelectorAll('.q-card');
-            for (const card of cards) {
-                const q = card.querySelector('.q-text').value.trim();
-                const correct = card.querySelector('input[type="radio"]:checked');
-                if (!q || !correct) { alert('กรอกข้อมูลให้ครบ!'); return; }
-                
-                const params = new URLSearchParams({ action: 'saveQuestion', category: cat, question: q, correct: correct.value });
-                ['A','B','C','D'].forEach(o => params.append('option' + o, card.querySelector(`[data-opt="${o}"]`).value.trim()));
-                
-                await fetch(`${API}?${params.toString()}`);
+            const cat = document.getElementById('catSel').value; if (!cat) return alert('เลือกหมวดก่อน!');
+            for (const c of document.querySelectorAll('.qcard')) {
+                const q = c.querySelector('.qt').value.trim();
+                const cor = c.querySelector('input[type="radio"]:checked');
+                if (!q || !cor) { alert('กรอกให้ครบ!'); return; }
+                const p = new URLSearchParams({ action: 'saveQuestion', category: cat, question: q, correct: cor.value });
+                ['A','B','C','D'].forEach(o => p.append('option' + o, c.querySelector(`[data-o="${o}"]`).value.trim()));
+                await fetch(`${API}?${p.toString()}`);
             }
-            
-            alert('✅ บันทึกแล้ว!');
-            document.getElementById('qContainer').innerHTML = '';
-            addQ();
-            await loadCategories();
+            alert('✅ บันทึกแล้ว!'); document.getElementById('qBox').innerHTML = ''; addQ(); await loadCats();
         }
 
-        async function loadManage() {
-            const cat = document.getElementById('filterCat').value;
+        async function loadM() {
+            const cat = document.getElementById('fCat').value;
             const r = await fetch(`${API}?action=getQuestions&category=${cat}`);
             const qs = await r.json();
-            
-            document.getElementById('manageList').innerHTML = qs.length === 0 ? '<p style="text-align:center;padding:40px">📭 ไม่พบข้อสอบ</p>' :
-                qs.map(q => `
-                    <div class="card" style="margin-bottom:8px">
-                        <b>${q.question}</b>
-                        <p style="font-size:14px;color:#94a3b8">A. ${q.option1} | B. ${q.option2}<br>C. ${q.option3} | D. ${q.option4}</p>
-                        <p style="color:#06C755">✅ ${q.correct} | ${q.status}</p>
-                        <div style="display:flex;gap:8px;margin-top:8px">
-                            <button class="btn btn-gray" onclick="toggleQ('${q.id}','${q.status}')" style="width:auto;padding:8px 16px">${q.status==='active'?'ปิด':'เปิด'}</button>
-                            <button class="btn btn-red" onclick="deleteQ('${q.id}')" style="width:auto;padding:8px 16px">ลบ</button>
-                        </div>
-                    </div>
-                `).join('');
+            document.getElementById('mList').innerHTML = qs.length === 0 ? '<p>📭 ไม่พบ</p>' : qs.map(q => `
+                <div class="card"><b>${q.question}</b><p style="color:#94a3b8">A. ${q.option1} | B. ${q.option2}<br>C. ${q.option3} | D. ${q.option4}</p><p style="color:#06C755">✅ ${q.correct} | ${q.status}</p>
+                <button class="btn btn-b" onclick="togQ('${q.id}','${q.status}')">${q.status==='active'?'ปิด':'เปิด'}</button>
+                <button class="btn btn-r" onclick="delQ('${q.id}')">ลบ</button></div>
+            `).join('');
         }
 
-        async function toggleQ(id, st) {
-            await fetch(`${API}?action=toggleQuestionStatus&questionId=${id}&status=${st==='active'?'inactive':'active'}`);
-            loadManage();
-            loadCategories();
-        }
+        async function togQ(id, st) { await fetch(`${API}?action=toggleQuestionStatus&questionId=${id}&status=${st==='active'?'inactive':'active'}`); loadM(); loadCats(); }
+        async function delQ(id) { if (confirm('ลบ?')) { await fetch(`${API}?action=deleteQuestion&questionId=${id}`); loadM(); loadCats(); } }
 
-        async function deleteQ(id) {
-            if (!confirm('ลบ?')) return;
-            await fetch(`${API}?action=deleteQuestion&questionId=${id}`);
-            loadManage();
-            loadCategories();
-        }
-
-        async function saveConfig() {
-            const cat = document.getElementById('configCat').value;
-            if (!cat) return alert('เลือกหมวดก่อน!');
-            
-            const params = new URLSearchParams({
-                action: 'saveExamConfig',
-                category: cat,
-                displayType: document.getElementById('configType').value,
-                limitPerSession: document.getElementById('configLimit').value,
-                passScore: document.getElementById('configPass').value
-            });
-            
-            await fetch(`${API}?${params.toString()}`);
-            alert('✅ บันทึกแล้ว!');
+        async function saveCfg() {
+            const cat = document.getElementById('cfgCat').value; if (!cat) return alert('เลือกหมวด!');
+            const p = new URLSearchParams({ action: 'saveExamConfig', category: cat, displayType: document.getElementById('cfgType').value, limitPerSession: document.getElementById('cfgLimit').value, passScore: document.getElementById('cfgPass').value });
+            await fetch(`${API}?${p.toString()}`); alert('✅ บันทึกแล้ว!');
         }
 
         window.addEventListener('DOMContentLoaded', init);
