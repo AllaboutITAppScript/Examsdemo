@@ -6,264 +6,933 @@
     <title>จัดการข้อสอบ</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://static.line-scdn.net/liff/edge/2/sdk.js"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <!-- Noto Sans Thai: อ่านง่าย เป็นทางการ + Prompt สำหรับหัวข้อ -->
+    <link href="https://fonts.googleapis.com/css2?family=Prompt:wght@300;400;500;600;700&family=Noto+Sans+Thai:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
     <style>
+        :root {
+            --green:       #06C755;
+            --green-dark:  #04a344;
+            --green-glow:  rgba(6,199,85,0.18);
+            --bg:          #080f1a;
+            --bg2:         #0d1724;
+            --surface:     #111d2e;
+            --surface2:    #172236;
+            --border:      #1e3050;
+            --border2:     #243858;
+            --text:        #e8f0fe;
+            --text2:       #8aa3c1;
+            --text3:       #4d6585;
+            --red:         #ef4444;
+            --orange:      #f97316;
+            --radius:      14px;
+            --radius-lg:   20px;
+            --radius-xl:   28px;
+        }
+
         * { margin: 0; padding: 0; box-sizing: border-box; }
-        body { font-family: 'Sarabun', 'Kanit', sans-serif; background: #0f172a; color: #e2e8f0; }
-        .bg-green { background: linear-gradient(135deg, #06C755, #059b40); }
-        .card { background: #1e293b; border: 1px solid #334155; border-radius: 16px; padding: 20px; margin-bottom: 12px; }
-        .inp { background: #0f172a; border: 1px solid #334155; color: #e2e8f0; padding: 12px 16px; border-radius: 12px; width: 100%; font-size: 14px; margin-bottom: 8px; }
-        .inp:focus { outline: none; border-color: #06C755; }
-        .btn { display: block; padding: 14px; border-radius: 12px; font-weight: bold; font-size: 16px; border: none; cursor: pointer; width: 100%; margin-bottom: 8px; text-align: center; transition: all 0.2s; }
-        .btn:active { transform: scale(0.97); }
-        .btn-g { background: #06C755; color: white; }
-        .btn-r { background: #dc2626; color: white; }
-        .btn-b { background: #334155; color: white; }
-        .btn-o { background: #f97316; color: white; }
-        .btn:disabled { opacity: 0.6; cursor: not-allowed; }
-        .tab { padding: 14px 8px; text-align: center; cursor: pointer; flex: 1; color: #94a3b8; border-bottom: 3px solid transparent; transition: all 0.2s; font-size: 13px; }
-        .tab-on { color: #06C755 !important; border-bottom: 3px solid #06C755 !important; font-weight: bold !important; }
+
+        body {
+            font-family: 'Noto Sans Thai', 'Prompt', sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            min-height: 100vh;
+            font-size: 15px;
+            line-height: 1.6;
+        }
+
+        /* ── Typography ─────────────────────────────────────── */
+        h1, h2, h3, .heading {
+            font-family: 'Prompt', 'Noto Sans Thai', sans-serif;
+            font-weight: 600;
+            letter-spacing: -0.01em;
+        }
+
+        /* ── Background mesh ────────────────────────────────── */
+        body::before {
+            content: '';
+            position: fixed;
+            inset: 0;
+            background:
+                radial-gradient(ellipse 60% 50% at 20% -10%, rgba(6,199,85,0.07) 0%, transparent 60%),
+                radial-gradient(ellipse 40% 40% at 80% 110%, rgba(6,199,85,0.05) 0%, transparent 60%);
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        /* ── Card ───────────────────────────────────────────── */
+        .card {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-lg);
+            padding: 20px;
+            margin-bottom: 12px;
+            position: relative;
+            overflow: hidden;
+            transition: border-color 0.2s;
+        }
+        .card::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(135deg, rgba(255,255,255,0.025) 0%, transparent 60%);
+            pointer-events: none;
+        }
+        .card:hover { border-color: var(--border2); }
+
+        /* ── Input ──────────────────────────────────────────── */
+        .inp {
+            background: var(--bg2);
+            border: 1.5px solid var(--border);
+            color: var(--text);
+            padding: 12px 16px;
+            border-radius: var(--radius);
+            width: 100%;
+            font-size: 14px;
+            font-family: 'Noto Sans Thai', sans-serif;
+            margin-bottom: 10px;
+            transition: border-color 0.2s, box-shadow 0.2s;
+            -webkit-appearance: none;
+        }
+        .inp:focus {
+            outline: none;
+            border-color: var(--green);
+            box-shadow: 0 0 0 3px var(--green-glow);
+        }
+        .inp::placeholder { color: var(--text3); }
+        select.inp { cursor: pointer; }
+        textarea.inp { resize: vertical; min-height: 64px; }
+
+        /* ── Buttons ────────────────────────────────────────── */
+        .btn {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            padding: 13px 20px;
+            border-radius: var(--radius);
+            font-family: 'Prompt', 'Noto Sans Thai', sans-serif;
+            font-weight: 600;
+            font-size: 14px;
+            border: none;
+            cursor: pointer;
+            width: 100%;
+            margin-bottom: 8px;
+            transition: all 0.18s;
+            letter-spacing: 0.01em;
+        }
+        .btn:active { transform: scale(0.96); }
+        .btn:disabled { opacity: 0.45; cursor: not-allowed; transform: none; }
+
+        .btn-g {
+            background: linear-gradient(135deg, var(--green), var(--green-dark));
+            color: white;
+            box-shadow: 0 4px 16px rgba(6,199,85,0.25);
+        }
+        .btn-g:hover:not(:disabled) { box-shadow: 0 6px 24px rgba(6,199,85,0.4); filter: brightness(1.05); }
+
+        .btn-r {
+            background: rgba(239,68,68,0.12);
+            color: #f87171;
+            border: 1px solid rgba(239,68,68,0.25);
+        }
+        .btn-r:hover:not(:disabled) { background: rgba(239,68,68,0.2); }
+
+        .btn-b {
+            background: var(--surface2);
+            color: var(--text2);
+            border: 1px solid var(--border);
+        }
+        .btn-b:hover:not(:disabled) { background: var(--border); color: var(--text); }
+
+        .btn-o {
+            background: rgba(249,115,22,0.12);
+            color: #fb923c;
+            border: 1px solid rgba(249,115,22,0.25);
+        }
+        .btn-o:hover:not(:disabled) { background: rgba(249,115,22,0.2); }
+
+        .btn-sm {
+            padding: 8px 14px;
+            font-size: 13px;
+            width: auto;
+            margin: 0;
+        }
+
+        /* ── Tabs ───────────────────────────────────────────── */
+        .tab-bar {
+            display: flex;
+            background: var(--surface);
+            border-bottom: 1px solid var(--border);
+            overflow-x: auto;
+            scrollbar-width: none;
+            position: sticky;
+            top: 0;
+            z-index: 10;
+        }
+        .tab-bar::-webkit-scrollbar { display: none; }
+
+        .tab {
+            padding: 14px 10px 12px;
+            text-align: center;
+            cursor: pointer;
+            flex: 1;
+            min-width: 72px;
+            color: var(--text3);
+            border-bottom: 2px solid transparent;
+            transition: all 0.2s;
+            font-size: 12px;
+            font-family: 'Prompt', sans-serif;
+            font-weight: 500;
+            white-space: nowrap;
+            letter-spacing: 0.02em;
+        }
+        .tab i { display: block; font-size: 17px; margin-bottom: 3px; }
+        .tab-on {
+            color: var(--green) !important;
+            border-bottom-color: var(--green) !important;
+        }
+
+        /* ── Header ─────────────────────────────────────────── */
+        .app-header {
+            background: linear-gradient(160deg, #0a2016 0%, #081a10 60%, var(--bg) 100%);
+            border-bottom: 1px solid rgba(6,199,85,0.15);
+            padding: 20px 20px 18px;
+            position: relative;
+        }
+        .app-header::after {
+            content: '';
+            position: absolute;
+            bottom: 0; left: 0; right: 0;
+            height: 1px;
+            background: linear-gradient(90deg, transparent, rgba(6,199,85,0.4), transparent);
+        }
+        .avatar-ring {
+            width: 44px; height: 44px;
+            border-radius: 50%;
+            border: 2px solid var(--green);
+            background: var(--surface2);
+            display: flex; align-items: center; justify-content: center;
+            font-size: 18px;
+            box-shadow: 0 0 12px var(--green-glow);
+            overflow: hidden;
+            flex-shrink: 0;
+        }
+        .avatar-ring img { width: 100%; height: 100%; object-fit: cover; }
+
+        /* ── Label ──────────────────────────────────────────── */
+        .lbl {
+            display: block;
+            font-family: 'Prompt', sans-serif;
+            font-size: 12px;
+            font-weight: 600;
+            color: var(--text3);
+            text-transform: uppercase;
+            letter-spacing: 0.08em;
+            margin-bottom: 7px;
+        }
+
+        /* ── Badge ──────────────────────────────────────────── */
+        .badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            padding: 3px 10px;
+            border-radius: 20px;
+            font-size: 11px;
+            font-weight: 600;
+            font-family: 'Prompt', sans-serif;
+        }
+        .badge-green { background: rgba(6,199,85,0.15); color: var(--green); border: 1px solid rgba(6,199,85,0.3); }
+        .badge-red   { background: rgba(239,68,68,0.12); color: #f87171; border: 1px solid rgba(239,68,68,0.25); }
+        .badge-gray  { background: var(--surface2); color: var(--text2); border: 1px solid var(--border); }
+
+        /* ── Option row (radio) ──────────────────────────────── */
+        .opt-row {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 6px;
+            background: var(--bg2);
+            border: 1.5px solid var(--border);
+            border-radius: var(--radius);
+            padding: 10px 12px;
+            transition: border-color 0.2s;
+        }
+        .opt-row:focus-within { border-color: var(--green); }
+        .opt-row input[type="radio"] { accent-color: var(--green); width: 17px; height: 17px; flex-shrink: 0; cursor: pointer; }
+        .opt-label { font-family: 'Prompt', sans-serif; font-weight: 700; font-size: 15px; color: var(--green); width: 20px; flex-shrink: 0; }
+        .opt-row .inp { margin: 0; background: transparent; border: none; padding: 0; box-shadow: none; }
+        .opt-row .inp:focus { box-shadow: none; }
+
+        /* ── Separator ──────────────────────────────────────── */
+        .sep {
+            height: 1px;
+            background: linear-gradient(90deg, transparent, var(--border), transparent);
+            margin: 16px 0;
+        }
+
+        /* ── Overlays ───────────────────────────────────────── */
         .hidden { display: none !important; }
-        .toast { position: fixed; bottom: 20px; left: 20px; right: 20px; background: #1e293b; border: 1px solid #334155; color: white; padding: 16px; border-radius: 12px; text-align: center; z-index: 200; opacity: 0; transition: opacity 0.3s; pointer-events: none; }
-        .toast-show { opacity: 1; }
-        .loading-overlay { position: fixed; inset: 0; background: rgba(15, 23, 42, 0.8); backdrop-filter: blur(4px); z-index: 300; display: flex; align-items: center; justify-content: center; opacity: 0; transition: opacity 0.3s; pointer-events: none; }
-        .loading-overlay.show { opacity: 1; pointer-events: all; }
-        .loading-box { background: #1e293b; border: 1px solid #334155; border-radius: 20px; padding: 32px 40px; text-align: center; box-shadow: 0 20px 60px rgba(0,0,0,0.5); }
-        .spinner { width: 48px; height: 48px; border: 4px solid #334155; border-top: 4px solid #06C755; border-radius: 50%; animation: spin 0.8s linear infinite; margin: 0 auto 16px; }
+
+        /* Loading screen */
+        #loadingScreen {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+        }
+        .ring-spinner {
+            width: 52px; height: 52px;
+            border: 3px solid var(--border);
+            border-top: 3px solid var(--green);
+            border-radius: 50%;
+            animation: spin 0.75s linear infinite;
+            margin: 0 auto 20px;
+        }
         @keyframes spin { to { transform: rotate(360deg); } }
-        .success-overlay { position: fixed; inset: 0; background: rgba(15, 23, 42, 0.85); backdrop-filter: blur(6px); z-index: 400; display: flex; align-items: center; justify-content: center; opacity: 0; transition: opacity 0.3s; pointer-events: none; }
+
+        /* Inline loader */
+        .loader {
+            width: 36px; height: 36px;
+            border: 3px solid var(--border);
+            border-top: 3px solid var(--green);
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+            margin: 28px auto;
+        }
+
+        /* Loading overlay */
+        .loading-overlay {
+            position: fixed; inset: 0;
+            background: rgba(8,15,26,0.75);
+            backdrop-filter: blur(6px);
+            z-index: 300;
+            display: flex; align-items: center; justify-content: center;
+            opacity: 0; transition: opacity 0.25s;
+            pointer-events: none;
+        }
+        .loading-overlay.show { opacity: 1; pointer-events: all; }
+        .loading-box {
+            background: var(--surface);
+            border: 1px solid var(--border2);
+            border-radius: var(--radius-xl);
+            padding: 36px 44px;
+            text-align: center;
+            box-shadow: 0 24px 64px rgba(0,0,0,0.6), 0 0 0 1px rgba(6,199,85,0.1);
+        }
+
+        /* Success overlay */
+        .success-overlay {
+            position: fixed; inset: 0;
+            background: rgba(8,15,26,0.8);
+            backdrop-filter: blur(8px);
+            z-index: 400;
+            display: flex; align-items: center; justify-content: center;
+            opacity: 0; transition: opacity 0.25s;
+            pointer-events: none;
+        }
         .success-overlay.show { opacity: 1; pointer-events: all; }
-        .success-box { background: #1e293b; border: 1px solid #06C755; border-radius: 24px; padding: 40px 32px; text-align: center; box-shadow: 0 20px 60px rgba(6, 199, 85, 0.2); max-width: 340px; width: 90%; animation: popIn 0.4s cubic-bezier(0.68, -0.55, 0.27, 1.55); }
-        @keyframes popIn { 0% { transform: scale(0.5); opacity: 0; } 100% { transform: scale(1); opacity: 1; } }
-        .success-icon { width: 80px; height: 80px; background: rgba(6, 199, 85, 0.15); border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 20px; animation: pulse 2s ease-in-out infinite; }
-        @keyframes pulse { 0%, 100% { box-shadow: 0 0 0 0 rgba(6, 199, 85, 0.4); } 50% { box-shadow: 0 0 0 20px rgba(6, 199, 85, 0); } }
-        .loader { width: 40px; height: 40px; border: 4px solid #334155; border-top: 4px solid #06C755; border-radius: 50%; animation: spin 1s linear infinite; margin: 20px auto; }
-        textarea { resize: vertical; min-height: 60px; }
+        .success-box {
+            background: var(--surface);
+            border: 1px solid rgba(6,199,85,0.3);
+            border-radius: var(--radius-xl);
+            padding: 44px 32px;
+            text-align: center;
+            box-shadow: 0 24px 80px rgba(6,199,85,0.12), 0 0 0 1px rgba(6,199,85,0.15);
+            max-width: 340px;
+            width: 90%;
+            animation: popIn 0.35s cubic-bezier(0.34, 1.56, 0.64, 1);
+        }
+        @keyframes popIn {
+            0%   { transform: scale(0.7) translateY(20px); opacity: 0; }
+            100% { transform: scale(1) translateY(0); opacity: 1; }
+        }
+        .success-icon-wrap {
+            width: 88px; height: 88px;
+            background: var(--green-glow);
+            border-radius: 50%;
+            display: flex; align-items: center; justify-content: center;
+            margin: 0 auto 24px;
+            box-shadow: 0 0 0 0 rgba(6,199,85,0.4);
+            animation: pulse 2.5s ease-in-out infinite;
+        }
+        @keyframes pulse {
+            0%, 100% { box-shadow: 0 0 0 0 rgba(6,199,85,0.4); }
+            50%       { box-shadow: 0 0 0 18px rgba(6,199,85,0); }
+        }
+
+        /* Toast */
+        .toast {
+            position: fixed;
+            bottom: 24px; left: 16px; right: 16px;
+            background: var(--surface2);
+            border: 1px solid var(--border2);
+            color: var(--text);
+            padding: 14px 18px;
+            border-radius: var(--radius);
+            font-size: 14px;
+            z-index: 500;
+            opacity: 0;
+            transform: translateY(12px);
+            transition: opacity 0.25s, transform 0.25s;
+            pointer-events: none;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            box-shadow: 0 8px 32px rgba(0,0,0,0.4);
+        }
+        .toast-show { opacity: 1 !important; transform: translateY(0) !important; }
+
+        /* ── Question card header ────────────────────────────── */
+        .q-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 14px;
+        }
+        .q-num-badge {
+            background: var(--green-glow);
+            color: var(--green);
+            border: 1px solid rgba(6,199,85,0.3);
+            border-radius: 8px;
+            padding: 3px 12px;
+            font-family: 'Prompt', sans-serif;
+            font-size: 13px;
+            font-weight: 700;
+        }
+
+        /* ── Empty state ────────────────────────────────────── */
+        .empty {
+            text-align: center;
+            padding: 52px 24px;
+            color: var(--text3);
+        }
+        .empty i { font-size: 40px; margin-bottom: 14px; display: block; opacity: 0.5; }
+        .empty p { font-size: 14px; }
+
+        /* ── Scrollbar ──────────────────────────────────────── */
+        ::-webkit-scrollbar { width: 4px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: var(--border2); border-radius: 4px; }
     </style>
 </head>
 <body>
 
-    <div id="loadingScreen" style="display:flex;align-items:center;justify-content:center;min-height:100vh;background:#0f172a;">
-        <div style="text-align:center"><div class="loader"></div><p style="color:#94a3b8;margin-top:16px">กำลังโหลดระบบ...</p><p id="loadingStatus" style="color:#64748b;font-size:12px;margin-top:8px"></p></div>
+    <!-- ════ Loading Screen ════ -->
+    <div id="loadingScreen">
+        <div style="text-align:center;padding:24px">
+            <div class="ring-spinner"></div>
+            <p style="color:var(--text2);font-family:'Prompt',sans-serif;font-weight:500;font-size:16px">กำลังโหลดระบบ...</p>
+            <p id="loadingStatus" style="color:var(--text3);font-size:12px;margin-top:8px"></p>
+        </div>
     </div>
 
-    <div id="mainApp" class="hidden" style="max-width:480px;margin:0 auto;min-height:100vh">
-        <div class="bg-green" style="padding:24px;border-radius:0 0 24px 24px">
-            <div style="display:flex;justify-content:space-between;align-items:center">
-                <div><h1 style="font-size:22px"><i class="fa-solid fa-graduation-cap"></i> จัดการข้อสอบ</h1><p id="userDisplayName" style="opacity:0.8;font-size:14px;margin-top:4px"></p></div>
-                <button onclick="closeApp()" style="background:rgba(255,255,255,0.2);border:none;color:white;padding:8px 12px;border-radius:8px;cursor:pointer;font-size:20px"><i class="fa-solid fa-xmark"></i></button>
+    <!-- ════ Main App ════ -->
+    <div id="mainApp" class="hidden" style="max-width:480px;margin:0 auto;min-height:100vh;position:relative;z-index:1">
+
+        <!-- Header -->
+        <div class="app-header">
+            <div style="display:flex;justify-content:space-between;align-items:center;gap:12px">
+                <div style="display:flex;align-items:center;gap:14px;flex:1;min-width:0">
+                    <div class="avatar-ring" id="avatarWrap">
+                        <i class="fa-solid fa-graduation-cap" style="color:var(--green)"></i>
+                    </div>
+                    <div style="min-width:0">
+                        <h1 style="font-size:17px;color:var(--text)">จัดการข้อสอบ</h1>
+                        <p id="userDisplayName" style="color:var(--text3);font-size:12px;margin-top:1px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis"></p>
+                    </div>
+                </div>
+                <button onclick="closeApp()" style="background:var(--surface2);border:1px solid var(--border);color:var(--text2);width:38px;height:38px;border-radius:10px;cursor:pointer;font-size:16px;flex-shrink:0;display:flex;align-items:center;justify-content:center;transition:all 0.2s" onmouseover="this.style.color='var(--text)'" onmouseout="this.style.color='var(--text2)'">
+                    <i class="fa-solid fa-xmark"></i>
+                </button>
             </div>
         </div>
-        <div style="display:flex;border-bottom:1px solid #334155;background:#1e293b;overflow-x:auto">
-            <div class="tab tab-on" onclick="switchTab('create')" id="tabCreate"><i class="fa-solid fa-plus-circle"></i> สร้าง</div>
-            <div class="tab" onclick="switchTab('manage')" id="tabManage"><i class="fa-solid fa-list-check"></i> จัดการ</div>
-            <div class="tab" onclick="switchTab('config')" id="tabConfig"><i class="fa-solid fa-sliders"></i> ตั้งค่า</div>
-            <div class="tab" onclick="switchTab('admins')" id="tabAdmins"><i class="fa-solid fa-user-shield"></i> แอดมิน</div>
+
+        <!-- Tab bar -->
+        <div class="tab-bar">
+            <div class="tab tab-on" onclick="switchTab('create')" id="tabCreate">
+                <i class="fa-solid fa-plus-circle"></i>สร้าง
+            </div>
+            <div class="tab" onclick="switchTab('manage')" id="tabManage">
+                <i class="fa-solid fa-list-check"></i>จัดการ
+            </div>
+            <div class="tab" onclick="switchTab('config')" id="tabConfig">
+                <i class="fa-solid fa-sliders"></i>ตั้งค่า
+            </div>
+            <div class="tab" onclick="switchTab('admins')" id="tabAdmins">
+                <i class="fa-solid fa-user-shield"></i>แอดมิน
+            </div>
         </div>
-        <div id="tabContent" style="padding:16px"></div>
+
+        <!-- Content -->
+        <div id="tabContent" style="padding:16px 14px 32px"></div>
     </div>
 
+    <!-- ════ Loading Overlay ════ -->
     <div id="loadingOverlay" class="loading-overlay">
-        <div class="loading-box"><div class="spinner"></div><p style="color:white;font-size:16px;font-weight:bold" id="loadingTitle">กำลังบันทึก...</p><p style="color:#94a3b8;font-size:13px;margin-top:4px" id="loadingSub"></p></div>
+        <div class="loading-box">
+            <div class="ring-spinner"></div>
+            <p style="color:var(--text);font-family:'Prompt',sans-serif;font-size:16px;font-weight:600" id="loadingTitle">กำลังบันทึก...</p>
+            <p style="color:var(--text3);font-size:13px;margin-top:6px" id="loadingSub"></p>
+        </div>
     </div>
 
+    <!-- ════ Success Overlay ════ -->
     <div id="successOverlay" class="success-overlay">
         <div class="success-box">
-            <div class="success-icon"><i class="fa-solid fa-circle-check" style="font-size:40px;color:#06C755"></i></div>
-            <h2 style="color:white;font-size:20px;margin-bottom:8px">บันทึกสำเร็จ!</h2>
-            <p id="successMessage" style="color:#94a3b8;font-size:14px;margin-bottom:20px"></p>
-            <button onclick="closeSuccess()" class="btn btn-g" style="width:auto;display:inline-block;padding:12px 32px"><i class="fa-solid fa-check"></i> ตกลง</button>
+            <div class="success-icon-wrap">
+                <i class="fa-solid fa-circle-check" style="font-size:44px;color:var(--green)"></i>
+            </div>
+            <h2 style="color:var(--text);font-family:'Prompt',sans-serif;font-size:22px;margin-bottom:10px">บันทึกสำเร็จ!</h2>
+            <p id="successMessage" style="color:var(--text2);font-size:14px;margin-bottom:28px;line-height:1.7"></p>
+            <button onclick="closeSuccess()" class="btn btn-g" style="width:auto;display:inline-flex;padding:12px 36px">
+                <i class="fa-solid fa-check"></i> ตกลง
+            </button>
         </div>
     </div>
 
-    <div id="toast" class="toast"><i id="toastIcon" class="fa-solid fa-circle-info" style="margin-right:8px"></i><span id="toastMsg"></span></div>
+    <!-- ════ Toast ════ -->
+    <div id="toast" class="toast">
+        <i id="toastIcon" class="fa-solid fa-circle-info" style="flex-shrink:0"></i>
+        <span id="toastMsg"></span>
+    </div>
 
     <script>
-        const LIFF_ID = '2008892438-qVn8tOFT';
-        const API_URL = 'https://script.google.com/macros/s/AKfycbzENEQQ1KmDwIgXitXpef_xNlXbDiBWcVai60WRVqTkP_zP_6iyXwa9shWCzEOxX4Bs/exec';
+        const LIFF_ID  = '2008892438-qVn8tOFT';
+        const API_URL  = 'https://script.google.com/macros/s/AKfycbzENEQQ1KmDwIgXitXpef_xNlXbDiBWcVai60WRVqTkP_zP_6iyXwa9shWCzEOxX4Bs/exec';
         let user = null, questionCount = 0, toastTimer = null;
 
+        // ════ INIT ════
         async function init() {
             try {
                 updateStatus('กำลังเริ่มต้น LIFF...');
                 await liff.init({ liffId: LIFF_ID });
-                if (!liff.isLoggedIn()) { updateStatus('กำลังเข้าสู่ระบบ...'); await liff.login(); }
+                if (!liff.isLoggedIn()) { updateStatus('กำลังเข้าสู่ระบบ...'); liff.login(); return; }
                 user = await liff.getProfile();
                 document.getElementById('userDisplayName').textContent = user.displayName;
-                if (liff.isInClient()) { try { const fs = await liff.getFriendship(); if (!fs.friendFlag) await liff.requestFriendship(); } catch(e) {} }
+
+                // แสดง avatar ถ้ามี
+                if (user.pictureUrl) {
+                    document.getElementById('avatarWrap').innerHTML = '<img src="' + user.pictureUrl + '" alt="">';
+                }
+
+                if (liff.isInClient()) {
+                    try { const fs = await liff.getFriendship(); if (!fs.friendFlag) liff.requestFriendship(); } catch(e) {}
+                }
+
                 updateStatus('กำลังตรวจสอบสิทธิ์...');
                 const r = await fetch(API_URL + '?action=checkAdmin&userId=' + encodeURIComponent(user.userId));
                 const d = await r.json();
-                if (!d.isAdmin) { showError('<i class="fa-solid fa-lock"></i> คุณไม่มีสิทธิ์เข้าถึง'); return; }
+
+                if (!d.isAdmin) {
+                    showError('<i class="fa-solid fa-lock" style="font-size:52px;color:var(--text3);margin-bottom:16px;display:block"></i><p style="color:var(--text);font-family:Prompt,sans-serif;font-size:18px;font-weight:600">ไม่มีสิทธิ์เข้าถึง</p><p style="color:var(--text3);font-size:13px;margin-top:8px">กรุณาติดต่อแอดมินเพื่อขอสิทธิ์</p>');
+                    return;
+                }
+
                 document.getElementById('loadingScreen').style.display = 'none';
                 document.getElementById('mainApp').classList.remove('hidden');
-                await loadCategories(); switchTab('create');
-            } catch(e) { showError(e.message); }
+                await loadCategories();
+                switchTab('create');
+            } catch(e) { showError('<i class="fa-solid fa-triangle-exclamation" style="font-size:52px;color:#f97316;margin-bottom:16px;display:block"></i><p style="color:var(--text);font-family:Prompt,sans-serif;font-size:16px">' + e.message + '</p>'); }
         }
 
         function updateStatus(m) { document.getElementById('loadingStatus').textContent = m; }
-        function showError(m) { document.getElementById('loadingScreen').innerHTML = '<div style="text-align:center"><i class="fa-solid fa-circle-exclamation" style="font-size:48px;color:#ef4444"></i><p style="color:white;margin-top:16px">' + m + '</p><button onclick="location.reload()" class="btn btn-g" style="width:auto;margin:16px auto;padding:12px 24px"><i class="fa-solid fa-rotate"></i> ลองใหม่</button></div>'; }
+        function showError(m) {
+            document.getElementById('loadingScreen').innerHTML = '<div style="text-align:center;padding:32px">' + m + '<button onclick="location.reload()" class="btn btn-g" style="width:auto;display:inline-flex;margin:20px auto 0;padding:12px 28px"><i class="fa-solid fa-rotate"></i> ลองใหม่</button></div>';
+        }
         function closeApp() { if (liff.isInClient()) liff.closeWindow(); else window.close(); }
-        function showLoading(t, s) { document.getElementById('loadingTitle').textContent = t || 'กำลังดำเนินการ...'; document.getElementById('loadingSub').textContent = s || ''; document.getElementById('loadingOverlay').classList.add('show'); }
+        function showLoading(t, s) {
+            document.getElementById('loadingTitle').textContent = t || 'กำลังดำเนินการ...';
+            document.getElementById('loadingSub').textContent  = s || '';
+            document.getElementById('loadingOverlay').classList.add('show');
+        }
         function hideLoading() { document.getElementById('loadingOverlay').classList.remove('show'); }
-        function showSuccess(m) { document.getElementById('successMessage').textContent = m; document.getElementById('successOverlay').classList.add('show'); }
+        function showSuccess(m) {
+            document.getElementById('successMessage').innerHTML = m;
+            document.getElementById('successOverlay').classList.add('show');
+        }
         function closeSuccess() { document.getElementById('successOverlay').classList.remove('show'); }
 
         function showToast(m, t) {
             t = t || 'info';
-            var icons = { success: 'fa-circle-check', error: 'fa-circle-exclamation', warning: 'fa-triangle-exclamation', info: 'fa-circle-info' };
-            document.getElementById('toastIcon').className = 'fa-solid ' + (icons[t] || icons.info);
+            var colors = { success:'var(--green)', error:'#f87171', warning:'#fb923c', info:'var(--text2)' };
+            var icons  = { success:'fa-circle-check', error:'fa-circle-exclamation', warning:'fa-triangle-exclamation', info:'fa-circle-info' };
+            var icon = document.getElementById('toastIcon');
+            icon.className = 'fa-solid ' + (icons[t] || icons.info);
+            icon.style.color = colors[t] || colors.info;
             document.getElementById('toastMsg').textContent = m;
-            document.getElementById('toast').classList.add('toast-show');
+            var toast = document.getElementById('toast');
+            toast.classList.add('toast-show');
             if (toastTimer) clearTimeout(toastTimer);
-            toastTimer = setTimeout(function() { document.getElementById('toast').classList.remove('toast-show'); }, 3000);
+            toastTimer = setTimeout(function() { toast.classList.remove('toast-show'); }, 3000);
         }
 
+        // ════ TABS ════
         function switchTab(tab) {
-            ['create','manage','config','admins'].forEach(function(t) { var el = document.getElementById('tab' + t.charAt(0).toUpperCase() + t.slice(1)); if (el) { el.classList.remove('tab-on'); el.style.color = '#94a3b8'; } });
-            var at = document.getElementById('tab' + tab.charAt(0).toUpperCase() + tab.slice(1)); if (at) { at.classList.add('tab-on'); at.style.color = '#06C755'; }
+            ['create','manage','config','admins'].forEach(function(t) {
+                var id = 'tab' + t.charAt(0).toUpperCase() + t.slice(1);
+                var el = document.getElementById(id);
+                if (el) el.classList.remove('tab-on');
+            });
+            var at = document.getElementById('tab' + tab.charAt(0).toUpperCase() + tab.slice(1));
+            if (at) at.classList.add('tab-on');
             renderTab(tab);
         }
 
         function renderTab(tab) {
             var c = document.getElementById('tabContent');
+
             if (tab === 'create') {
-                c.innerHTML = '<div class="card"><label style="font-weight:bold;margin-bottom:8px;display:block"><i class="fa-solid fa-layer-group"></i> เลือกหมวดข้อสอบ</label><select id="categorySelect" class="inp"><option value="">-- เลือกหมวด --</option></select></div><div id="questionsContainer"></div><button class="btn btn-b" onclick="addQuestion()"><i class="fa-solid fa-plus"></i> เพิ่มคำถาม</button><button class="btn btn-g" onclick="saveAllQuestions()" id="saveBtn"><i class="fa-solid fa-floppy-disk"></i> บันทึกข้อสอบทั้งหมด</button>';
-                loadCategories(); addQuestion();
-            } else if (tab === 'manage') {
-                c.innerHTML = '<div class="card"><label style="font-weight:bold;margin-bottom:8px;display:block"><i class="fa-solid fa-filter"></i> กรองตามหมวด</label><select id="filterCategory" class="inp" onchange="loadQuestions()"><option value="all">ทุกหมวด</option></select></div><div id="questionsList"><div class="loader"></div></div>';
-                loadCategories(); loadQuestions();
-            } else if (tab === 'config') {
-                c.innerHTML = '<div class="card"><h3 style="font-size:18px;margin-bottom:16px"><i class="fa-solid fa-sliders"></i> ตั้งค่าชุดข้อสอบ</h3><label style="font-weight:bold;margin-bottom:8px;display:block"><i class="fa-solid fa-layer-group"></i> เลือกหมวด</label><select id="configCategory" class="inp"><option value="">-- เลือกหมวด --</option></select><label style="font-weight:bold;margin-bottom:8px;display:block"><i class="fa-solid fa-mobile-screen"></i> รูปแบบข้อสอบ</label><select id="configDisplayType" class="inp"><option value="flex">Flex Message</option><option value="quickReply">Quick Reply</option></select><label style="font-weight:bold;margin-bottom:8px;display:block"><i class="fa-solid fa-hashtag"></i> จำนวนข้อต่อครั้ง</label><input type="number" id="configLimit" class="inp" value="10" min="1" max="50"><label style="font-weight:bold;margin-bottom:8px;display:block"><i class="fa-solid fa-bullseye"></i> เปอร์เซ็นต์ผ่าน</label><input type="number" id="configPass" class="inp" value="60" min="0" max="100"><button class="btn btn-g" onclick="saveConfig()"><i class="fa-solid fa-floppy-disk"></i> บันทึกการตั้งค่า</button></div>';
+                c.innerHTML = `
+                    <div class="card">
+                        <label class="lbl"><i class="fa-solid fa-layer-group" style="color:var(--green)"></i> หมวดข้อสอบ</label>
+                        <select id="categorySelect" class="inp"><option value="">-- เลือกหมวดหมู่ --</option></select>
+                    </div>
+                    <div id="questionsContainer"></div>
+                    <button class="btn btn-b" onclick="addQuestion()"><i class="fa-solid fa-plus"></i> เพิ่มคำถาม</button>
+                    <button class="btn btn-g" onclick="saveAllQuestions()" id="saveBtn"><i class="fa-solid fa-floppy-disk"></i> บันทึกข้อสอบทั้งหมด</button>
+                `;
                 loadCategories();
+                addQuestion();
+
+            } else if (tab === 'manage') {
+                c.innerHTML = `
+                    <div class="card">
+                        <label class="lbl"><i class="fa-solid fa-filter" style="color:var(--green)"></i> กรองตามหมวด</label>
+                        <select id="filterCategory" class="inp" onchange="loadQuestions()">
+                            <option value="all">ทุกหมวด</option>
+                        </select>
+                    </div>
+                    <div id="questionsList"><div class="loader"></div></div>
+                `;
+                loadCategories();
+                loadQuestions();
+
+            } else if (tab === 'config') {
+                c.innerHTML = `
+                    <div class="card">
+                        <h3 class="heading" style="font-size:17px;margin-bottom:18px;color:var(--text)">
+                            <i class="fa-solid fa-sliders" style="color:var(--green)"></i> ตั้งค่าชุดข้อสอบ
+                        </h3>
+                        <label class="lbl">หมวดหมู่</label>
+                        <select id="configCategory" class="inp"><option value="">-- เลือกหมวด --</option></select>
+                        <label class="lbl" style="margin-top:4px">รูปแบบการแสดงผล</label>
+                        <select id="configDisplayType" class="inp">
+                            <option value="flex">Flex Message (ปุ่ม)</option>
+                            <option value="quickReply">Quick Reply (ด้านล่าง)</option>
+                        </select>
+                        <label class="lbl" style="margin-top:4px">จำนวนข้อต่อครั้ง</label>
+                        <input type="number" id="configLimit" class="inp" value="10" min="1" max="50">
+                        <label class="lbl" style="margin-top:4px">เกณฑ์ผ่าน (%)</label>
+                        <input type="number" id="configPass" class="inp" value="60" min="0" max="100">
+                        <button class="btn btn-g" onclick="saveConfig()" style="margin-top:8px">
+                            <i class="fa-solid fa-floppy-disk"></i> บันทึกการตั้งค่า
+                        </button>
+                    </div>
+                `;
+                loadCategories();
+
             } else if (tab === 'admins') {
-                c.innerHTML = '<div class="card"><h3 style="font-size:18px;margin-bottom:16px"><i class="fa-solid fa-user-shield"></i> จัดการแอดมิน</h3><label style="font-weight:bold;margin-bottom:8px;display:block"><i class="fa-solid fa-user-plus"></i> เพิ่มแอดมินจากผู้ใช้</label><select id="userSelect" class="inp"><option value="">-- เลือกผู้ใช้ --</option></select><button class="btn btn-g" onclick="addAdminUser()"><i class="fa-solid fa-plus"></i> เพิ่มเป็นแอดมิน</button></div><div class="card"><h3 style="font-size:18px;margin-bottom:16px"><i class="fa-solid fa-list"></i> รายชื่อแอดมิน</h3><div id="adminsList"><div class="loader"></div></div></div>';
-                loadUsers(); loadAdmins();
+                c.innerHTML = `
+                    <div class="card">
+                        <h3 class="heading" style="font-size:17px;margin-bottom:18px;color:var(--text)">
+                            <i class="fa-solid fa-user-plus" style="color:var(--green)"></i> เพิ่มแอดมิน
+                        </h3>
+                        <label class="lbl">เลือกผู้ใช้ที่เคยใช้ระบบ</label>
+                        <select id="userSelect" class="inp"><option value="">-- เลือกผู้ใช้ --</option></select>
+                        <button class="btn btn-g" onclick="addAdminUser()">
+                            <i class="fa-solid fa-plus"></i> เพิ่มเป็นแอดมิน
+                        </button>
+                    </div>
+                    <div class="card">
+                        <h3 class="heading" style="font-size:17px;margin-bottom:18px;color:var(--text)">
+                            <i class="fa-solid fa-list" style="color:var(--green)"></i> รายชื่อแอดมิน
+                        </h3>
+                        <div id="adminsList"><div class="loader"></div></div>
+                    </div>
+                `;
+                loadUsers();
+                loadAdmins();
             }
         }
 
+        // ════ CATEGORIES ════
         async function loadCategories() {
             try {
-                const r = await fetch(API_URL + '?action=getCategories'); const cats = await r.json();
-                var cs = document.getElementById('categorySelect'); if (cs) cs.innerHTML = '<option value="">-- เลือกหมวด --</option>' + cats.map(function(c) { return '<option value="' + c.name + '">' + c.name + ' (' + (c.questionCount || 0) + ' ข้อ)</option>'; }).join('');
-                var fs = document.getElementById('filterCategory'); if (fs) fs.innerHTML = '<option value="all">ทุกหมวด</option>' + cats.map(function(c) { return '<option value="' + c.name + '">' + c.name + '</option>'; }).join('');
-                var cf = document.getElementById('configCategory'); if (cf) { cf.innerHTML = '<option value="">-- เลือกหมวด --</option>' + cats.map(function(c) { return '<option value="' + c.name + '">' + c.name + '</option>'; }).join(''); cf.onchange = function() { var s = cats.find(function(x) { return x.name === cf.value; }); if (s) { document.getElementById('configDisplayType').value = s.displayType || 'flex'; document.getElementById('configLimit').value = s.limitPerSession || 10; document.getElementById('configPass').value = s.passScore || 50; } }; }
-            } catch(e) {}
+                const r    = await fetch(API_URL + '?action=getCategories');
+                const cats = await r.json();
+
+                var opts = cats.map(function(c) {
+                    return '<option value="' + c.name + '">' + c.name + ' (' + (c.questionCount || 0) + ' ข้อ)</option>';
+                }).join('');
+
+                var cs = document.getElementById('categorySelect');
+                if (cs) cs.innerHTML = '<option value="">-- เลือกหมวดหมู่ --</option>' + opts;
+
+                var fs = document.getElementById('filterCategory');
+                if (fs) fs.innerHTML = '<option value="all">ทุกหมวด</option>' + cats.map(function(c) {
+                    return '<option value="' + c.name + '">' + c.name + '</option>';
+                }).join('');
+
+                var cf = document.getElementById('configCategory');
+                if (cf) {
+                    cf.innerHTML = '<option value="">-- เลือกหมวด --</option>' + cats.map(function(c) {
+                        return '<option value="' + c.name + '">' + c.name + '</option>';
+                    }).join('');
+                    cf.onchange = function() {
+                        var sel = cats.find(function(x) { return x.name === cf.value; });
+                        if (sel) {
+                            document.getElementById('configDisplayType').value = sel.displayType    || 'flex';
+                            document.getElementById('configLimit').value        = sel.limitPerSession || 10;
+                            document.getElementById('configPass').value         = sel.passScore       || 50;
+                        }
+                    };
+                }
+            } catch(e) { console.error('loadCategories:', e); }
         }
 
+        // ════ CREATE / QUESTION FORM ════
         function addQuestion(data) {
-            data = data || {}; var container = document.getElementById('questionsContainer'); if (!container) return;
+            data = data || {};
+            var container = document.getElementById('questionsContainer');
+            if (!container) return;
+
             var index = questionCount;
-            var card = document.createElement('div'); card.className = 'card question-card'; card.setAttribute('data-index', index);
-            card.innerHTML = '<div style="display:flex;justify-content:space-between;margin-bottom:12px"><span style="font-weight:bold"><i class="fa-solid fa-pencil"></i> ข้อที่ <span class="q-num">' + (index + 1) + '</span></span><button onclick="this.closest(\'.question-card\').remove();reindexQuestions();" style="background:none;border:none;color:#ef4444;cursor:pointer;font-size:16px"><i class="fa-solid fa-trash-can"></i></button></div><textarea class="inp q-text" rows="2" placeholder="พิมพ์คำถามที่นี่...">' + (data.question || '') + '</textarea>' + ['A','B','C','D'].map(function(o, idx) { return '<div style="display:flex;align-items:center;gap:8px;margin-bottom:4px"><input type="radio" name="correct_' + index + '" value="' + o + '" style="accent-color:#06C755;width:18px;height:18px" ' + (data.correct === o ? 'checked' : '') + '><span style="font-weight:bold;width:24px">' + o + '.</span><input type="text" class="inp" placeholder="ตัวเลือก ' + o + '" data-opt="' + o + '" value="' + (data['option' + (idx + 1)] || '') + '" style="margin:0"></div>'; }).join('') + (data.id ? '<input type="hidden" class="q-id" value="' + data.id + '">' : '');
-            container.appendChild(card); questionCount++;
+            var card  = document.createElement('div');
+            card.className = 'card question-card';
+            card.setAttribute('data-index', index);
+
+            card.innerHTML = `
+                <div class="q-header">
+                    <div class="q-num-badge">ข้อที่ <span class="q-num">${index + 1}</span></div>
+                    <button onclick="this.closest('.question-card').remove(); reindexQuestions();"
+                        style="background:rgba(239,68,68,0.1);border:1px solid rgba(239,68,68,0.25);color:#f87171;width:34px;height:34px;border-radius:8px;cursor:pointer;font-size:14px;display:flex;align-items:center;justify-content:center;transition:all 0.2s"
+                        onmouseover="this.style.background='rgba(239,68,68,0.2)'" onmouseout="this.style.background='rgba(239,68,68,0.1)'">
+                        <i class="fa-solid fa-trash-can"></i>
+                    </button>
+                </div>
+                <label class="lbl">คำถาม</label>
+                <textarea class="inp q-text" rows="2" placeholder="พิมพ์คำถามที่นี่...">${data.question || ''}</textarea>
+                <label class="lbl" style="margin-top:4px">ตัวเลือก <span style="color:var(--green);font-weight:700">(เลือกคำตอบที่ถูกต้อง)</span></label>
+                ${['A','B','C','D'].map(function(o, idx) {
+                    return `<div class="opt-row">
+                        <input type="radio" name="correct_${index}" value="${o}" ${data.correct === o ? 'checked' : ''}>
+                        <span class="opt-label">${o}</span>
+                        <input type="text" class="inp" placeholder="ตัวเลือก ${o}" data-opt="${o}" value="${data['option' + (idx+1)] || ''}">
+                    </div>`;
+                }).join('')}
+                ${data.id ? '<input type="hidden" class="q-id" value="' + data.id + '">' : ''}
+            `;
+
+            container.appendChild(card);
+            questionCount++;
         }
 
         function reindexQuestions() {
-            document.querySelectorAll('.question-card').forEach(function(c, i) { c.setAttribute('data-index', i); c.querySelector('.q-num').textContent = i + 1; c.querySelectorAll('input[type="radio"]').forEach(function(r) { r.name = 'correct_' + i; }); });
+            document.querySelectorAll('.question-card').forEach(function(c, i) {
+                c.setAttribute('data-index', i);
+                var numEl = c.querySelector('.q-num'); if (numEl) numEl.textContent = i + 1;
+                c.querySelectorAll('input[type="radio"]').forEach(function(r) { r.name = 'correct_' + i; });
+            });
             questionCount = document.querySelectorAll('.question-card').length;
         }
 
-        // ✅ ใช้ URLSearchParams (GET) แทน FormData
         async function saveAllQuestions() {
             var cat = document.getElementById('categorySelect');
             if (!cat || !cat.value) { showToast('กรุณาเลือกหมวดข้อสอบก่อน', 'warning'); return; }
             var cards = document.querySelectorAll('.question-card');
             if (cards.length === 0) { showToast('กรุณาเพิ่มคำถามอย่างน้อย 1 ข้อ', 'warning'); return; }
-            
+
             showLoading('กำลังบันทึกข้อสอบ...', 'กรุณารอสักครู่');
-            
+
             try {
                 for (var i = 0; i < cards.length; i++) {
-                    var card = cards[i];
-                    var question = card.querySelector('.q-text').value.trim();
-                    var correctRadio = card.querySelector('input[type="radio"]:checked');
-                    var qid = card.querySelector('.q-id') ? card.querySelector('.q-id').value : null;
-                    
-                    if (!question) throw new Error('กรุณากรอกคำถามข้อที่ ' + (i + 1));
-                    if (!correctRadio) throw new Error('กรุณาเลือกคำตอบที่ถูกต้อง ข้อที่ ' + (i + 1));
-                    
-                    // ✅ ใช้ URLSearchParams
+                    var card      = cards[i];
+                    var question  = card.querySelector('.q-text').value.trim();
+                    var radio     = card.querySelector('input[type="radio"]:checked');
+                    var qidEl     = card.querySelector('.q-id');
+
+                    if (!question) throw new Error('กรุณากรอกคำถามข้อที่ ' + (i+1));
+                    if (!radio)    throw new Error('กรุณาเลือกคำตอบที่ถูกต้องสำหรับข้อที่ ' + (i+1));
+
                     var params = new URLSearchParams();
-                    params.append('action', 'saveQuestion');
+                    params.append('action',   'saveQuestion');
                     params.append('category', cat.value);
                     params.append('question', question);
-                    params.append('correct', correctRadio.value);
-                    params.append('optionA', card.querySelector('[data-opt="A"]').value.trim());
-                    params.append('optionB', card.querySelector('[data-opt="B"]').value.trim());
-                    params.append('optionC', card.querySelector('[data-opt="C"]').value.trim());
-                    params.append('optionD', card.querySelector('[data-opt="D"]').value.trim());
-                    if (qid) params.append('id', qid);
-                    
+                    params.append('correct',  radio.value);
+                    params.append('optionA',  card.querySelector('[data-opt="A"]').value.trim());
+                    params.append('optionB',  card.querySelector('[data-opt="B"]').value.trim());
+                    params.append('optionC',  card.querySelector('[data-opt="C"]').value.trim());
+                    params.append('optionD',  card.querySelector('[data-opt="D"]').value.trim());
+                    if (qidEl) params.append('id', qidEl.value);
+
                     var r = await fetch(API_URL + '?' + params.toString());
                     var d = await r.json();
-                    if (!d.success) throw new Error(d.message || 'บันทึกไม่สำเร็จ');
+                    if (!d.success) throw new Error(d.message || 'บันทึกข้อที่ ' + (i+1) + ' ไม่สำเร็จ');
                 }
-                
+
                 hideLoading();
-                showSuccess('บันทึกข้อสอบ <b>' + cards.length + '</b> ข้อเรียบร้อย!');
-                document.getElementById('questionsContainer').innerHTML = ''; questionCount = 0; addQuestion(); cat.value = '';
+                showSuccess('บันทึกข้อสอบ <strong>' + cards.length + '</strong> ข้อในหมวด <strong>' + cat.value + '</strong> เรียบร้อยแล้ว!');
+                document.getElementById('questionsContainer').innerHTML = '';
+                questionCount = 0;
+                addQuestion();
+                cat.value = '';
                 await loadCategories();
+
             } catch(e) { hideLoading(); showToast(e.message, 'error'); }
         }
 
+        // ════ MANAGE ════
         async function loadQuestions() {
-            var container = document.getElementById('questionsList'); if (!container) return;
+            var container = document.getElementById('questionsList');
+            if (!container) return;
             container.innerHTML = '<div class="loader"></div>';
+
             try {
-                var cat = document.getElementById('filterCategory'); var category = cat ? cat.value : 'all';
-                var r = await fetch(API_URL + '?action=getQuestions&category=' + category); var questions = await r.json();
-                if (questions.length === 0) { container.innerHTML = '<div style="text-align:center;padding:40px;color:#94a3b8"><i class="fa-solid fa-folder-open"></i> ไม่พบข้อสอบ</div>'; return; }
+                var catEl    = document.getElementById('filterCategory');
+                var category = catEl ? catEl.value : 'all';
+                var r        = await fetch(API_URL + '?action=getQuestions&category=' + encodeURIComponent(category));
+                var questions = await r.json();
+
+                if (questions.length === 0) {
+                    container.innerHTML = '<div class="empty"><i class="fa-solid fa-folder-open"></i><p>ไม่พบข้อสอบในหมวดนี้</p></div>';
+                    return;
+                }
+
                 container.innerHTML = questions.map(function(q) {
-                    return '<div class="card" style="opacity:' + (q.status === 'inactive' ? '0.5' : '1') + '"><div style="display:flex;justify-content:space-between;margin-bottom:8px"><span style="background:' + (q.status === 'active' ? '#16a34a' : '#dc2626') + ';color:white;padding:2px 10px;border-radius:20px;font-size:12px"><i class="fa-solid ' + (q.status === 'active' ? 'fa-circle-check' : 'fa-circle-pause') + '"></i> ' + (q.status === 'active' ? 'ใช้งาน' : 'ปิด') + '</span><span style="background:#334155;padding:2px 10px;border-radius:20px;font-size:12px"><i class="fa-solid fa-folder"></i> ' + q.category + '</span></div><h3 style="font-size:16px;margin-bottom:8px">' + q.question + '</h3><div style="font-size:13px;color:#94a3b8;margin-bottom:8px">A. ' + q.option1 + ' &nbsp; B. ' + q.option2 + '<br>C. ' + q.option3 + ' &nbsp; D. ' + q.option4 + '</div><div style="color:#06C755;font-size:13px;margin-bottom:8px"><i class="fa-solid fa-check-circle"></i> คำตอบ: ' + q.correct + '</div><div style="display:flex;gap:8px"><button class="btn btn-o" style="flex:1;font-size:13px;padding:8px" onclick="toggleQuestion(\'' + q.id + '\',\'' + q.status + '\')"><i class="fa-solid ' + (q.status === 'active' ? 'fa-pause' : 'fa-play') + '"></i> ' + (q.status === 'active' ? 'ปิดใช้งาน' : 'เปิดใช้งาน') + '</button><button class="btn btn-r" style="flex:1;font-size:13px;padding:8px" onclick="deleteQuestion(\'' + q.id + '\')"><i class="fa-solid fa-trash-can"></i> ลบ</button></div></div>';
+                    var isActive = q.status === 'active';
+                    return `
+                    <div class="card" style="opacity:${isActive ? 1 : 0.55}">
+                        <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:12px;gap:8px">
+                            <span class="badge ${isActive ? 'badge-green' : 'badge-red'}">
+                                <i class="fa-solid ${isActive ? 'fa-circle-dot' : 'fa-circle-pause'}"></i>
+                                ${isActive ? 'ใช้งาน' : 'ปิด'}
+                            </span>
+                            <span class="badge badge-gray"><i class="fa-solid fa-folder"></i> ${q.category}</span>
+                        </div>
+                        <p style="font-weight:600;font-size:15px;margin-bottom:10px;line-height:1.5;color:var(--text)">${q.question}</p>
+                        <div style="font-size:13px;color:var(--text3);margin-bottom:10px;line-height:1.8">
+                            <span style="color:${q.correct==='A'?'var(--green)':'var(--text3)'}">A. ${q.option1}</span> &nbsp;
+                            <span style="color:${q.correct==='B'?'var(--green)':'var(--text3)'}">B. ${q.option2}</span><br>
+                            <span style="color:${q.correct==='C'?'var(--green)':'var(--text3)'}">C. ${q.option3}</span> &nbsp;
+                            <span style="color:${q.correct==='D'?'var(--green)':'var(--text3)'}">D. ${q.option4}</span>
+                        </div>
+                        <div style="font-size:12px;color:var(--green);margin-bottom:12px;font-weight:600">
+                            <i class="fa-solid fa-check-circle"></i> เฉลย: ${q.correct}
+                        </div>
+                        <div class="sep"></div>
+                        <div style="display:flex;gap:8px">
+                            <button class="btn btn-o btn-sm" style="flex:1" onclick="toggleQuestion('${q.id}','${q.status}')">
+                                <i class="fa-solid ${isActive ? 'fa-pause' : 'fa-play'}"></i>
+                                ${isActive ? 'ปิดใช้งาน' : 'เปิดใช้งาน'}
+                            </button>
+                            <button class="btn btn-r btn-sm" style="flex:1" onclick="deleteQuestion('${q.id}')">
+                                <i class="fa-solid fa-trash-can"></i> ลบ
+                            </button>
+                        </div>
+                    </div>`;
                 }).join('');
-            } catch(e) { container.innerHTML = '<div style="text-align:center;color:#ef4444"><i class="fa-solid fa-triangle-exclamation"></i> เกิดข้อผิดพลาด</div>'; }
+
+            } catch(e) {
+                container.innerHTML = '<div class="empty"><i class="fa-solid fa-triangle-exclamation" style="color:var(--red)"></i><p>เกิดข้อผิดพลาดในการโหลด</p></div>';
+            }
         }
 
         async function toggleQuestion(id, status) {
-            await fetch(API_URL + '?action=toggleQuestionStatus&questionId=' + id + '&status=' + (status === 'active' ? 'inactive' : 'active'));
-            showToast('เรียบร้อย', 'success'); loadQuestions(); loadCategories();
+            var newStatus = status === 'active' ? 'inactive' : 'active';
+            await fetch(API_URL + '?action=toggleQuestionStatus&questionId=' + id + '&status=' + newStatus);
+            showToast(newStatus === 'active' ? 'เปิดใช้งานแล้ว' : 'ปิดใช้งานแล้ว', 'success');
+            loadQuestions(); loadCategories();
         }
 
         async function deleteQuestion(id) {
-            if (!confirm('ยืนยันการลบข้อสอบนี้?')) return;
+            if (!confirm('ยืนยันการลบข้อสอบนี้?\nการลบจะไม่สามารถเรียกคืนได้')) return;
             await fetch(API_URL + '?action=deleteQuestion&questionId=' + id);
-            showToast('ลบข้อสอบเรียบร้อย', 'success'); loadQuestions(); loadCategories();
+            showToast('ลบข้อสอบเรียบร้อย', 'success');
+            loadQuestions(); loadCategories();
         }
 
+        // ════ CONFIG ════
         async function saveConfig() {
             var cat = document.getElementById('configCategory').value;
             if (!cat) { showToast('กรุณาเลือกหมวดข้อสอบ', 'warning'); return; }
             showLoading('กำลังบันทึกการตั้งค่า...', cat);
             var params = new URLSearchParams();
-            params.append('action', 'saveExamConfig');
-            params.append('category', cat);
-            params.append('displayType', document.getElementById('configDisplayType').value);
+            params.append('action',          'saveExamConfig');
+            params.append('category',        cat);
+            params.append('displayType',     document.getElementById('configDisplayType').value);
             params.append('limitPerSession', document.getElementById('configLimit').value);
-            params.append('passScore', document.getElementById('configPass').value);
+            params.append('passScore',       document.getElementById('configPass').value);
             try {
-                var r = await fetch(API_URL + '?' + params.toString()); var d = await r.json();
+                var r = await fetch(API_URL + '?' + params.toString());
+                var d = await r.json();
                 hideLoading();
-                if (d.success) { showSuccess('ตั้งค่าหมวด <b>' + cat + '</b> เรียบร้อย!'); loadCategories(); }
+                if (d.success) { showSuccess('ตั้งค่าหมวด <strong>' + cat + '</strong> เรียบร้อยแล้ว!'); loadCategories(); }
                 else showToast(d.message || 'บันทึกไม่สำเร็จ', 'error');
-            } catch(e) { hideLoading(); showToast('เกิดข้อผิดพลาด', 'error'); }
+            } catch(e) { hideLoading(); showToast('เกิดข้อผิดพลาด: ' + e.message, 'error'); }
         }
 
+        // ════ ADMINS ════
         async function loadUsers() {
-            try { var r = await fetch(API_URL + '?action=getUsers'); var users = await r.json(); var s = document.getElementById('userSelect'); if (s) s.innerHTML = '<option value="">-- เลือกผู้ใช้ --</option>' + users.map(function(u) { return '<option value="' + u.userId + '">' + u.displayName + '</option>'; }).join(''); } catch(e) {}
-        }
-
-        async function loadAdmins() {
-            var c = document.getElementById('adminsList'); if (!c) return; c.innerHTML = '<div class="loader"></div>';
             try {
-                var r = await fetch(API_URL + '?action=getAdmins'); var admins = await r.json();
-                if (admins.length === 0) { c.innerHTML = '<div style="text-align:center;padding:20px;color:#94a3b8"><i class="fa-solid fa-user-slash"></i> ไม่มีแอดมิน</div>'; return; }
-                c.innerHTML = admins.map(function(a) { return '<div class="card" style="display:flex;justify-content:space-between;align-items:center"><div><div style="font-weight:bold;color:white">' + a.name + '</div><div style="font-size:12px;color:#94a3b8">' + a.role + '</div></div><button class="btn btn-r" style="width:auto;padding:8px 16px;font-size:13px" onclick="removeAdminUser(\'' + a.userId + '\')"><i class="fa-solid fa-trash-can"></i></button></div>'; }).join('');
+                var r     = await fetch(API_URL + '?action=getUsers');
+                var users = await r.json();
+                var s     = document.getElementById('userSelect');
+                if (s) s.innerHTML = '<option value="">-- เลือกผู้ใช้ --</option>' +
+                    users.map(function(u) { return '<option value="' + u.userId + '">' + u.displayName + '</option>'; }).join('');
             } catch(e) {}
         }
 
-        async function addAdminUser() { var s = document.getElementById('userSelect'); if (!s || !s.value) { showToast('กรุณาเลือกผู้ใช้ก่อน', 'warning'); return; } await fetch(API_URL + '?action=addAdmin&userId=' + encodeURIComponent(s.value)); showToast('เพิ่มแอดมินเรียบร้อย!', 'success'); loadAdmins(); }
-        async function removeAdminUser(uid) { if (!confirm('ยืนยันการลบแอดมินนี้?')) return; await fetch(API_URL + '?action=removeAdmin&userId=' + uid); showToast('ลบแอดมินเรียบร้อย!', 'success'); loadAdmins(); }
+        async function loadAdmins() {
+            var c = document.getElementById('adminsList');
+            if (!c) return;
+            c.innerHTML = '<div class="loader"></div>';
+            try {
+                var r      = await fetch(API_URL + '?action=getAdmins');
+                var admins = await r.json();
+                if (admins.length === 0) {
+                    c.innerHTML = '<div class="empty" style="padding:28px"><i class="fa-solid fa-user-slash"></i><p>ยังไม่มีแอดมิน</p></div>';
+                    return;
+                }
+                c.innerHTML = admins.map(function(a) {
+                    return `
+                    <div style="display:flex;justify-content:space-between;align-items:center;padding:12px 0;border-bottom:1px solid var(--border);gap:12px">
+                        <div style="display:flex;align-items:center;gap:12px;min-width:0">
+                            <div style="width:36px;height:36px;border-radius:50%;background:var(--green-glow);border:1px solid rgba(6,199,85,0.3);display:flex;align-items:center;justify-content:center;flex-shrink:0">
+                                <i class="fa-solid fa-user" style="color:var(--green);font-size:14px"></i>
+                            </div>
+                            <div style="min-width:0">
+                                <div style="font-weight:600;color:var(--text);font-size:14px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${a.name}</div>
+                                <div style="font-size:11px;color:var(--text3);font-family:Prompt,sans-serif">${a.role}</div>
+                            </div>
+                        </div>
+                        <button class="btn btn-r" style="width:auto;padding:7px 14px;font-size:12px;margin:0;flex-shrink:0" onclick="removeAdminUser('${a.userId}')">
+                            <i class="fa-solid fa-trash-can"></i>
+                        </button>
+                    </div>`;
+                }).join('');
+            } catch(e) {}
+        }
+
+        async function addAdminUser() {
+            var s = document.getElementById('userSelect');
+            if (!s || !s.value) { showToast('กรุณาเลือกผู้ใช้ก่อน', 'warning'); return; }
+            showLoading('กำลังเพิ่มแอดมิน...');
+            await fetch(API_URL + '?action=addAdmin&userId=' + encodeURIComponent(s.value));
+            hideLoading();
+            showToast('เพิ่มแอดมินเรียบร้อย!', 'success');
+            loadAdmins();
+        }
+
+        async function removeAdminUser(uid) {
+            if (!confirm('ยืนยันการลบแอดมินนี้?')) return;
+            await fetch(API_URL + '?action=removeAdmin&userId=' + uid);
+            showToast('ลบแอดมินเรียบร้อย!', 'success');
+            loadAdmins();
+        }
 
         window.addEventListener('DOMContentLoaded', init);
     </script>
