@@ -13,47 +13,32 @@
         *{font-family:'Kanit',-apple-system,BlinkMacSystemFont,sans-serif}
         body{background:#0f172a;-webkit-tap-highlight-color:transparent;overscroll-behavior:none;touch-action:manipulation}
         .gradient-bg{background:linear-gradient(135deg,#06C755 0%,#059b40 100%)}
-        .card-dark{background:#1e293b;border-color:#334155}
-        .card-dark:hover{border-color:#06C755;box-shadow:0 0 20px rgba(6,199,85,.15)}
-        .input-dark{background:#0f172a;border-color:#334155;color:#e2e8f0}
-        .input-dark:focus{border-color:#06C755;box-shadow:0 0 0 3px rgba(6,199,85,.2)}
+        .card-dark{background:#1e293b;border-color:#334155}.card-dark:hover{border-color:#06C755;box-shadow:0 0 20px rgba(6,199,85,.15)}
+        .input-dark{background:#0f172a;border-color:#334155;color:#e2e8f0}.input-dark:focus{border-color:#06C755;box-shadow:0 0 0 3px rgba(6,199,85,.2)}
         .tab-active{color:#06C755!important;border-bottom:3px solid #06C755!important;font-weight:600!important;background:rgba(6,199,85,.05)}
-        .fade-in{animation:fadeIn .4s ease-in-out}
-        @keyframes fadeIn{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
-        .success-animation{animation:successPop .6s cubic-bezier(.68,-.55,.265,1.55)}
-        @keyframes successPop{0%{transform:scale(0);opacity:0}50%{transform:scale(1.1)}100%{transform:scale(1);opacity:1}}
-        .pulse-glow{animation:pulseGlow 2s ease-in-out infinite}
-        @keyframes pulseGlow{0%,100%{box-shadow:0 0 10px rgba(6,199,85,.3)}50%{box-shadow:0 0 25px rgba(6,199,85,.6)}}
-        .loader{width:24px;height:24px;border:3px solid #334155;border-top:3px solid #06C755;border-radius:50%;animation:spin .8s linear infinite}
-        @keyframes spin{0%{transform:rotate(0deg)}100%{transform:rotate(360deg)}}
+        .fade-in{animation:fadeIn .4s ease-in-out}@keyframes fadeIn{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
+        .loader{width:24px;height:24px;border:3px solid #334155;border-top:3px solid #06C755;border-radius:50%;animation:spin .8s linear infinite}@keyframes spin{0%{transform:rotate(0deg)}100%{transform:rotate(360deg)}}
         .btn-press:active{transform:scale(.96)}
-        .toast-enter{animation:toastIn .4s ease-out}
-        @keyframes toastIn{from{transform:translateY(20px);opacity:0}to{transform:translateY(0);opacity:1}}
+        .toast-enter{animation:toastIn .4s ease-out}@keyframes toastIn{from{transform:translateY(20px);opacity:0}to{transform:translateY(0);opacity:1}}
         select{appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3E%3Cpath stroke='%2394a3b8' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='M6 8l4 4 4-4'/%3E%3C/svg%3E");background-position:right .75rem center;background-repeat:no-repeat;background-size:1.5em 1.5em;padding-right:2.5rem}
         ::-webkit-scrollbar{width:4px}::-webkit-scrollbar-track{background:#1e293b}::-webkit-scrollbar-thumb{background:#475569;border-radius:4px}
     </style>
 </head>
 <body class="min-h-screen bg-dark-950 text-slate-200">
     <div id="loadingScreen" class="fixed inset-0 bg-dark-950 z-50 flex items-center justify-center">
-        <div class="text-center">
-            <div class="relative mb-6"><div class="loader" style="width:64px;height:64px;border-width:4px"></div><i class="fa-solid fa-book-open absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 text-line text-2xl"></i></div>
-            <p class="text-slate-400 font-light text-lg tracking-wide">กำลังโหลดระบบ...</p>
-        </div>
+        <div class="text-center"><div class="relative mb-6"><div class="loader" style="width:64px;height:64px;border-width:4px"></div><i class="fa-solid fa-book-open absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 text-line text-2xl"></i></div><p class="text-slate-400 font-light text-lg tracking-wide">กำลังโหลดระบบ...</p></div>
     </div>
-
     <div id="mainApp" class="hidden max-w-lg mx-auto min-h-screen">
         <div class="gradient-bg p-6 rounded-b-3xl shadow-2xl sticky top-0 z-20">
-            <div class="flex items-center justify-between">
-                <div><h1 class="text-2xl font-bold tracking-wide"><i class="fa-solid fa-graduation-cap mr-2"></i>จัดการข้อสอบ</h1><p id="userDisplayName" class="text-sm text-white/70 mt-1 font-light"><i class="fa-solid fa-circle-notch fa-spin mr-1"></i>กำลังโหลด...</p></div>
-                <button onclick="closeApp()" class="bg-white/10 hover:bg-white/20 p-2.5 rounded-xl transition-all backdrop-blur-sm"><i class="fa-solid fa-xmark text-lg"></i></button>
-            </div>
+            <div class="flex items-center justify-between"><div><h1 class="text-2xl font-bold tracking-wide"><i class="fa-solid fa-graduation-cap mr-2"></i>จัดการข้อสอบ</h1><p id="userDisplayName" class="text-sm text-white/70 mt-1 font-light"><i class="fa-solid fa-circle-notch fa-spin mr-1"></i>กำลังโหลด...</p></div><button onclick="closeApp()" class="bg-white/10 hover:bg-white/20 p-2.5 rounded-xl transition-all backdrop-blur-sm"><i class="fa-solid fa-xmark text-lg"></i></button></div>
         </div>
-
         <nav class="flex bg-dark-900 border-b border-dark-700 sticky top-[104px] z-10">
-            <button onclick="switchTab('create')" id="tabCreateBtn" class="tab-active flex-1 py-4 text-center font-medium text-slate-400 transition-all duration-300"><i class="fa-solid fa-plus-circle mr-1.5"></i> สร้างข้อสอบ</button>
-            <button onclick="switchTab('manage')" id="tabManageBtn" class="flex-1 py-4 text-center font-medium text-slate-500 transition-all duration-300"><i class="fa-solid fa-list-check mr-1.5"></i> จัดการข้อสอบ</button>
+            <button onclick="switchTab('create')" id="tabCreateBtn" class="tab-active flex-1 py-4 text-center font-medium text-slate-400 transition-all duration-300"><i class="fa-solid fa-plus-circle mr-1.5"></i> สร้าง</button>
+            <button onclick="switchTab('manage')" id="tabManageBtn" class="flex-1 py-4 text-center font-medium text-slate-500 transition-all duration-300"><i class="fa-solid fa-list-check mr-1.5"></i> จัดการ</button>
+            <button onclick="switchTab('admins')" id="tabAdminsBtn" class="flex-1 py-4 text-center font-medium text-slate-500 transition-all duration-300"><i class="fa-solid fa-user-shield mr-1.5"></i> แอดมิน</button>
         </nav>
 
+        <!-- Tab Create -->
         <section id="tabCreate" class="p-4 fade-in">
             <div class="mb-5"><label class="block text-sm font-semibold mb-2 text-slate-300"><i class="fa-solid fa-layer-group mr-1 text-line"></i> หมวดหมู่ <span class="text-red-400">*</span></label><select id="categorySelect" class="w-full p-3.5 rounded-xl input-dark transition-all duration-200"><option value="">-- เลือกหมวดข้อสอบ --</option></select></div>
             <div id="questionsContainer" class="space-y-4"></div>
@@ -61,211 +46,147 @@
             <button onclick="saveAllQuestions()" id="saveBtn" class="w-full mt-5 gradient-bg text-white p-4 rounded-xl font-bold text-lg hover:shadow-lg hover:shadow-line/20 transition-all duration-300 btn-press"><i class="fa-solid fa-floppy-disk mr-2"></i> บันทึกข้อสอบทั้งหมด</button>
         </section>
 
+        <!-- Tab Manage -->
         <section id="tabManage" class="p-4 hidden">
             <div class="flex gap-2 mb-4">
-                <select id="filterCategoryM" onchange="loadQuestionList()" class="flex-1 p-3 rounded-xl input-dark text-sm transition-all duration-200"><option value="all">📂 ทุกหมวดหมู่</option></select>
-                <select id="filterStatusM" onchange="loadQuestionList()" class="flex-1 p-3 rounded-xl input-dark text-sm transition-all duration-200"><option value="all">📊 ทุกสถานะ</option><option value="active">🟢 ใช้งาน</option><option value="inactive">🔴 ปิดใช้</option></select>
+                <select id="filterCategoryM" onchange="loadQuestionList()" class="flex-1 p-3 rounded-xl input-dark text-sm"><option value="all">📂 ทุกหมวดหมู่</option></select>
+                <select id="filterStatusM" onchange="loadQuestionList()" class="flex-1 p-3 rounded-xl input-dark text-sm"><option value="all">📊 ทุกสถานะ</option><option value="active">🟢 ใช้งาน</option><option value="inactive">🔴 ปิดใช้</option></select>
             </div>
-            <div class="relative mb-4"><i class="fa-solid fa-magnifying-glass absolute left-4 top-1/2 -translate-y-1/2 text-slate-500"></i><input type="text" id="searchInput" oninput="loadQuestionList()" placeholder="ค้นหาคำถาม..." class="w-full p-3 pl-11 rounded-xl input-dark text-sm transition-all duration-200"></div>
+            <div class="relative mb-4"><i class="fa-solid fa-magnifying-glass absolute left-4 top-1/2 -translate-y-1/2 text-slate-500"></i><input type="text" id="searchInput" oninput="loadQuestionList()" placeholder="ค้นหาคำถาม..." class="w-full p-3 pl-11 rounded-xl input-dark text-sm"></div>
             <p id="questionCountDisplay" class="text-sm text-slate-500 mb-3 font-light"></p>
             <div id="questionsList" class="space-y-3"><div class="text-center py-16"><div class="loader mb-4 mx-auto"></div><p class="text-slate-500 font-light">กำลังโหลดข้อสอบ...</p></div></div>
         </section>
 
-        <div id="successPopup" class="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center hidden opacity-0 transition-all duration-300">
-            <div class="bg-dark-800 rounded-3xl p-8 mx-4 max-w-sm w-full shadow-2xl border border-dark-600 success-animation">
-                <div class="text-center">
-                    <div class="w-20 h-20 bg-line/20 rounded-full flex items-center justify-center mx-auto mb-5 pulse-glow"><i class="fa-solid fa-circle-check text-line text-4xl"></i></div>
-                    <h2 class="text-xl font-bold text-white mb-2">บันทึกสำเร็จ!</h2>
-                    <p id="successMessage" class="text-slate-400 mb-6 font-light"></p>
-                    <button onclick="closeSuccessPopup()" class="gradient-bg text-white px-8 py-3 rounded-xl font-medium w-full hover:shadow-lg transition-all"><i class="fa-solid fa-check mr-2"></i> ตกลง</button>
+        <!-- Tab Admins -->
+        <section id="tabAdmins" class="p-4 hidden">
+            <div class="mb-6"><h2 class="text-lg font-bold mb-4"><i class="fa-solid fa-user-shield mr-2 text-line"></i>จัดการแอดมิน</h2>
+                <div class="card-dark rounded-2xl p-5 border mb-4">
+                    <h3 class="font-semibold mb-3"><i class="fa-solid fa-user-plus mr-2 text-line"></i>เพิ่มแอดมิน</h3>
+                    <select id="userSelect" class="w-full p-3 rounded-xl input-dark mb-3 text-sm"><option value="">-- เลือกผู้ใช้ --</option></select>
+                    <select id="roleSelect" class="w-full p-3 rounded-xl input-dark mb-3 text-sm"><option value="admin">Admin</option><option value="super_admin">Super Admin</option></select>
+                    <button onclick="addNewAdmin()" class="w-full gradient-bg text-white p-3 rounded-xl font-medium"><i class="fa-solid fa-plus mr-2"></i>เพิ่มเป็นแอดมิน</button>
                 </div>
+                <h3 class="font-semibold mb-3"><i class="fa-solid fa-list mr-2 text-line"></i>รายชื่อแอดมิน</h3>
+                <div id="adminsList" class="space-y-2"><div class="text-center py-8 text-slate-500">กำลังโหลด...</div></div>
+            </div>
+        </section>
+
+        <div id="successPopup" class="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center hidden opacity-0 transition-all duration-300">
+            <div class="bg-dark-800 rounded-3xl p-8 mx-4 max-w-sm w-full shadow-2xl border border-dark-600 success-animation" style="animation:successPop .6s cubic-bezier(.68,-.55,.265,1.55)">
+                <div class="text-center"><div class="w-20 h-20 bg-line/20 rounded-full flex items-center justify-center mx-auto mb-5 pulse-glow" style="animation:pulseGlow 2s ease-in-out infinite"><i class="fa-solid fa-circle-check text-line text-4xl"></i></div><h2 class="text-xl font-bold text-white mb-2">บันทึกสำเร็จ!</h2><p id="successMessage" class="text-slate-400 mb-6 font-light"></p><button onclick="closeSuccessPopup()" class="gradient-bg text-white px-8 py-3 rounded-xl font-medium w-full hover:shadow-lg transition-all"><i class="fa-solid fa-check mr-2"></i> ตกลง</button></div>
             </div>
         </div>
-
-        <div id="toast" class="fixed bottom-24 left-4 right-4 mx-auto max-w-sm opacity-0 pointer-events-none transition-all duration-300 z-50" style="transform:translateY(20px)">
-            <div id="toastContent" class="bg-dark-800 border border-dark-600 text-white p-4 rounded-2xl shadow-2xl flex items-center gap-3"><i id="toastIcon" class="text-lg"></i><span id="toastMessage" class="text-sm font-light"></span></div>
-        </div>
+        <div id="toast" class="fixed bottom-24 left-4 right-4 mx-auto max-w-sm opacity-0 pointer-events-none transition-all duration-300 z-50" style="transform:translateY(20px)"><div id="toastContent" class="bg-dark-800 border border-dark-600 text-white p-4 rounded-2xl shadow-2xl flex items-center gap-3"><i id="toastIcon" class="text-lg"></i><span id="toastMessage" class="text-sm font-light"></span></div></div>
     </div>
 
     <script>
         const LIFF_ID = '2008892438-qVn8tOFT';
         const API_ENDPOINT = 'https://script.google.com/macros/s/AKfycbzENEQQ1KmDwIgXitXpef_xNlXbDiBWcVai60WRVqTkP_zP_6iyXwa9shWCzEOxX4Bs/exec';
-        let currentUser = null, questionCounter = 0, toastTimeout = null;
+        let currentUser=null, questionCounter=0, toastTimeout=null;
 
-        async function initApp() {
-            try {
-                await liff.init({ liffId: LIFF_ID });
-                if (!liff.isLoggedIn()) await liff.login();
-                currentUser = await liff.getProfile();
-                document.getElementById('userDisplayName').textContent = `👤 ${currentUser.displayName}`;
-                if (liff.isInClient()) { try { const fs = await liff.getFriendship(); if (!fs.friendFlag) await liff.requestFriendship(); } catch(e) {} }
-                
-                let isAdmin = false;
-                for (let i = 0; i < 3; i++) {
-                    const r = await fetch(`${API_ENDPOINT}?action=checkAdmin&userId=${encodeURIComponent(currentUser.userId)}`);
-                    const d = await r.json();
-                    if (d.isAdmin) { isAdmin = true; break; }
-                    await new Promise(r => setTimeout(r, 1000));
-                }
-                
-                if (!isAdmin) { showToast('กรุณาลองใหม่ หรือแอดบอทเป็นเพื่อนก่อน', 'warning'); return; }
-                
-                hideLoading();
-                await loadCategories();
-                addQuestionCard();
-            } catch(e) {
-                console.error(e);
-                document.querySelector('#loadingScreen p').textContent = '❌ เกิดข้อผิดพลาด';
-            }
+        async function initApp(){
+            try{
+                await liff.init({liffId:LIFF_ID}); if(!liff.isLoggedIn()) await liff.login();
+                currentUser=await liff.getProfile(); document.getElementById('userDisplayName').textContent=`👤 ${currentUser.displayName}`;
+                if(liff.isInClient()){try{const fs=await liff.getFriendship(); if(!fs.friendFlag) await liff.requestFriendship();}catch(e){}}
+                let isAdmin=false;
+                for(let i=0;i<3;i++){const r=await fetch(`${API_ENDPOINT}?action=checkAdmin&userId=${encodeURIComponent(currentUser.userId)}`);const d=await r.json();if(d.isAdmin){isAdmin=true;break;}await new Promise(r=>setTimeout(r,1000));}
+                if(!isAdmin){showToast('กรุณาลองใหม่ หรือแอดบอทเป็นเพื่อนก่อน','warning');return;}
+                hideLoading(); await loadCategories(); addQuestionCard();
+            }catch(e){console.error(e);document.querySelector('#loadingScreen p').textContent='❌ เกิดข้อผิดพลาด';}
         }
+        function hideLoading(){document.getElementById('loadingScreen').style.opacity='0';document.getElementById('loadingScreen').style.transition='opacity .5s';setTimeout(()=>{document.getElementById('loadingScreen').style.display='none';document.getElementById('mainApp').classList.remove('hidden');},500);}
+        function closeApp(){if(liff.isInClient()) liff.closeWindow();else window.close();}
+        function showToast(msg,type='info'){const icons={success:'fa-circle-check text-green-400',error:'fa-circle-exclamation text-red-400',warning:'fa-triangle-exclamation text-yellow-400',info:'fa-circle-info text-blue-400'};document.getElementById('toastIcon').className=`fa-solid ${icons[type]||icons.info} text-lg`;document.getElementById('toastMessage').textContent=msg;const toast=document.getElementById('toast');toast.classList.add('toast-enter');toast.style.opacity='1';toast.style.transform='translateY(0)';toast.style.pointerEvents='auto';if(toastTimeout) clearTimeout(toastTimeout);toastTimeout=setTimeout(()=>{toast.style.opacity='0';toast.style.transform='translateY(20px)';toast.style.pointerEvents='none';},3000);}
+        function showSuccessPopup(msg){document.getElementById('successMessage').textContent=msg;const p=document.getElementById('successPopup');p.classList.remove('hidden');requestAnimationFrame(()=>p.style.opacity='1');}
+        function closeSuccessPopup(){const p=document.getElementById('successPopup');p.style.opacity='0';setTimeout(()=>p.classList.add('hidden'),300);}
 
-        function hideLoading() {
-            document.getElementById('loadingScreen').style.opacity = '0';
-            document.getElementById('loadingScreen').style.transition = 'opacity .5s';
-            setTimeout(() => { document.getElementById('loadingScreen').style.display = 'none'; document.getElementById('mainApp').classList.remove('hidden'); }, 500);
-        }
-
-        function closeApp() { if (liff.isInClient()) liff.closeWindow(); else window.close(); }
-
-        function showToast(msg, type = 'info') {
-            const icons = { success: 'fa-circle-check text-green-400', error: 'fa-circle-exclamation text-red-400', warning: 'fa-triangle-exclamation text-yellow-400', info: 'fa-circle-info text-blue-400' };
-            document.getElementById('toastIcon').className = `fa-solid ${icons[type] || icons.info} text-lg`;
-            document.getElementById('toastMessage').textContent = msg;
-            const toast = document.getElementById('toast');
-            toast.classList.add('toast-enter'); toast.style.opacity = '1'; toast.style.transform = 'translateY(0)'; toast.style.pointerEvents = 'auto';
-            if (toastTimeout) clearTimeout(toastTimeout);
-            toastTimeout = setTimeout(() => { toast.style.opacity = '0'; toast.style.transform = 'translateY(20px)'; toast.style.pointerEvents = 'none'; }, 3000);
-        }
-
-        function showSuccessPopup(msg) { document.getElementById('successMessage').textContent = msg; const p = document.getElementById('successPopup'); p.classList.remove('hidden'); requestAnimationFrame(() => p.style.opacity = '1'); }
-        function closeSuccessPopup() { const p = document.getElementById('successPopup'); p.style.opacity = '0'; setTimeout(() => p.classList.add('hidden'), 300); }
-
-        function switchTab(tab) {
-            ['tabCreateBtn','tabManageBtn'].forEach(id => { document.getElementById(id).classList.remove('tab-active'); document.getElementById(id).classList.add('text-slate-500'); });
+        function switchTab(tab){
+            ['tabCreateBtn','tabManageBtn','tabAdminsBtn'].forEach(id=>{document.getElementById(id).classList.remove('tab-active');document.getElementById(id).classList.add('text-slate-500');});
             document.getElementById('tabCreate').classList.add('hidden');
             document.getElementById('tabManage').classList.add('hidden');
-            if (tab === 'create') { document.getElementById('tabCreateBtn').classList.add('tab-active'); document.getElementById('tabCreate').classList.remove('hidden'); }
-            else { document.getElementById('tabManageBtn').classList.add('tab-active'); document.getElementById('tabManage').classList.remove('hidden'); loadQuestionList(); }
+            document.getElementById('tabAdmins').classList.add('hidden');
+            if(tab==='create'){document.getElementById('tabCreateBtn').classList.add('tab-active');document.getElementById('tabCreate').classList.remove('hidden');}
+            else if(tab==='manage'){document.getElementById('tabManageBtn').classList.add('tab-active');document.getElementById('tabManage').classList.remove('hidden');loadQuestionList();}
+            else{document.getElementById('tabAdminsBtn').classList.add('tab-active');document.getElementById('tabAdmins').classList.remove('hidden');loadUsers();loadAdmins();}
         }
 
-        async function loadCategories() {
-            const res = await fetch(`${API_ENDPOINT}?action=getCategories`);
-            const cats = await res.json();
-            let html = '<option value="">-- เลือกหมวดข้อสอบ --</option>';
-            cats.forEach(c => html += `<option value="${c.name}">${c.name} (${c.questionCount||0} ข้อ)</option>`);
-            document.getElementById('categorySelect').innerHTML = html;
-            html = '<option value="all">📂 ทุกหมวดหมู่</option>';
-            cats.forEach(c => html += `<option value="${c.name}">${c.name}</option>`);
-            document.getElementById('filterCategoryM').innerHTML = html;
+        async function loadCategories(){
+            const res=await fetch(`${API_ENDPOINT}?action=getCategories`);const cats=await res.json();
+            let html='<option value="">-- เลือกหมวดข้อสอบ --</option>';
+            cats.forEach(c=>html+=`<option value="${c.name}">${c.name} (${c.questionCount||0} ข้อ) ผ่าน ${c.passScore||50}%</option>`);
+            document.getElementById('categorySelect').innerHTML=html;
+            html='<option value="all">📂 ทุกหมวดหมู่</option>';
+            cats.forEach(c=>html+=`<option value="${c.name}">${c.name}</option>`);
+            document.getElementById('filterCategoryM').innerHTML=html;
         }
 
-        function addQuestionCard(data = null) {
-            const i = questionCounter;
-            const card = document.createElement('div');
-            card.className = 'question-card card-dark rounded-2xl p-5 border fade-in transition-all duration-300';
-            card.dataset.index = i;
-            card.innerHTML = `
-                <div class="flex justify-between items-center mb-4">
-                    <span class="text-sm font-semibold text-slate-400"><i class="fa-solid fa-pencil mr-1"></i> ข้อที่ <span class="q-num">${i+1}</span></span>
-                    <button type="button" onclick="removeQuestionCard(this)" class="text-red-400 hover:text-red-300 text-sm font-medium transition-colors"><i class="fa-solid fa-trash-can mr-1"></i> ลบ</button>
-                </div>
+        function addQuestionCard(data=null){
+            const i=questionCounter;
+            const card=document.createElement('div');
+            card.className='question-card card-dark rounded-2xl p-5 border fade-in transition-all duration-300';
+            card.dataset.index=i;
+            card.innerHTML=`
+                <div class="flex justify-between items-center mb-4"><span class="text-sm font-semibold text-slate-400"><i class="fa-solid fa-pencil mr-1"></i> ข้อที่ <span class="q-num">${i+1}</span></span><button type="button" onclick="removeQuestionCard(this)" class="text-red-400 hover:text-red-300 text-sm font-medium"><i class="fa-solid fa-trash-can mr-1"></i> ลบ</button></div>
                 <textarea data-field="question" class="w-full p-3.5 rounded-xl input-dark mb-4 transition-all duration-200" rows="2" placeholder="พิมพ์คำถามที่นี่...">${data?.question||''}</textarea>
                 <div class="space-y-3 mb-4">
-                    ${['A','B','C','D'].map((opt, idx) => `
-                        <div class="flex items-center space-x-3">
-                            <input type="radio" name="correct_${i}" value="${opt}" class="w-5 h-5 accent-line" ${data?.correct===opt?'checked':''}>
-                            <span class="font-semibold text-slate-300 w-6">${opt}.</span>
-                            <input type="text" data-field="option${opt}" class="flex-1 p-3 rounded-xl input-dark text-sm transition-all duration-200" placeholder="ตัวเลือก ${opt}" value="${data?.['option'+(idx+1)]||''}">
-                        </div>
+                    ${['A','B','C','D'].map((opt,idx)=>`
+                        <div class="flex items-center space-x-3"><input type="radio" name="correct_${i}" value="${opt}" class="w-5 h-5 accent-line" ${data?.correct===opt?'checked':''}><span class="font-semibold text-slate-300 w-6">${opt}.</span><input type="text" data-field="option${opt}" class="flex-1 p-3 rounded-xl input-dark text-sm transition-all duration-200" placeholder="ตัวเลือก ${opt}" value="${data?.['option'+(idx+1)]||''}"></div>
                     `).join('')}
                 </div>
-                <div class="grid grid-cols-2 gap-3">
-                    <select data-field="displayType" class="p-3 rounded-xl input-dark text-sm transition-all duration-200">
-                        <option value="flex" ${data?.displayType==='flex'?'selected':''}>📱 Flex</option>
-                        <option value="quickReply" ${data?.displayType==='quickReply'?'selected':''}>💬 Quick Reply</option>
-                    </select>
-                    <input type="number" data-field="limitPerSession" class="p-3 rounded-xl input-dark text-sm transition-all duration-200" value="${data?.limitPerSession||10}" min="1" max="50">
+                <div class="grid grid-cols-3 gap-3">
+                    <select data-field="displayType" class="p-3 rounded-xl input-dark text-sm"><option value="flex" ${data?.displayType==='flex'?'selected':''}>📱 Flex</option><option value="quickReply" ${data?.displayType==='quickReply'?'selected':''}>💬 Quick</option></select>
+                    <input type="number" data-field="limitPerSession" class="p-3 rounded-xl input-dark text-sm" value="${data?.limitPerSession||10}" min="1" max="50" placeholder="ข้อ/ครั้ง">
+                    <input type="number" data-field="passScore" class="p-3 rounded-xl input-dark text-sm" value="${data?.passScore||50}" min="0" max="100" placeholder="ผ่าน%">
                 </div>
                 ${data?.id?`<input type="hidden" data-field="id" value="${data.id}">`:''}
             `;
-            document.getElementById('questionsContainer').appendChild(card);
-            questionCounter++;
+            document.getElementById('questionsContainer').appendChild(card); questionCounter++;
         }
 
-        function removeQuestionCard(btn) {
-            const cards = document.querySelectorAll('.question-card');
-            if (cards.length <= 1) { showToast('ต้องมีอย่างน้อย 1 คำถาม', 'warning'); return; }
-            btn.closest('.question-card').remove();
-            reindexCards();
-        }
+        function removeQuestionCard(btn){const cards=document.querySelectorAll('.question-card');if(cards.length<=1){showToast('ต้องมีอย่างน้อย 1 คำถาม','warning');return;}btn.closest('.question-card').remove();reindexCards();}
+        function reindexCards(){document.querySelectorAll('.question-card').forEach((c,i)=>{c.dataset.index=i;c.querySelector('.q-num').textContent=i+1;c.querySelectorAll('input[type="radio"]').forEach(r=>r.name=`correct_${i}`);});questionCounter=document.querySelectorAll('.question-card').length;}
 
-        function reindexCards() {
-            document.querySelectorAll('.question-card').forEach((c,i) => { c.dataset.index = i; c.querySelector('.q-num').textContent = i+1; c.querySelectorAll('input[type="radio"]').forEach(r => r.name = `correct_${i}`); });
-            questionCounter = document.querySelectorAll('.question-card').length;
-        }
-
-        async function saveAllQuestions() {
-            const cat = document.getElementById('categorySelect').value;
-            if (!cat) { showToast('กรุณาเลือกหมวดข้อสอบ', 'warning'); return; }
-            const cards = document.querySelectorAll('.question-card');
-            const questions = [];
-            let ok = true;
-            cards.forEach((c,i) => {
-                const q = c.querySelector('[data-field="question"]').value.trim();
-                const opts = {};
-                ['A','B','C','D'].forEach(o => opts[o] = c.querySelector(`[data-field="option${o}"]`).value.trim());
-                const correct = c.querySelector(`input[name="correct_${i}"]:checked`);
-                const dt = c.querySelector('[data-field="displayType"]').value;
-                const limit = c.querySelector('[data-field="limitPerSession"]').value;
-                const id = c.querySelector('[data-field="id"]')?.value;
-                if (!q || Object.values(opts).some(v=>!v) || !correct) { showToast(`ข้อมูลไม่ครบ ข้อ ${i+1}`,'warning'); ok = false; return; }
-                const qd = {category:cat,question:q,option1:opts.A,option2:opts.B,option3:opts.C,option4:opts.D,correct:correct.value,displayType:dt,limitPerSession:parseInt(limit),status:'active'};
-                if (id) qd.id = id;
-                questions.push(qd);
+        async function saveAllQuestions(){
+            const cat=document.getElementById('categorySelect').value; if(!cat){showToast('กรุณาเลือกหมวดข้อสอบ','warning');return;}
+            const cards=document.querySelectorAll('.question-card'); const questions=[]; let ok=true;
+            cards.forEach((c,i)=>{
+                const q=c.querySelector('[data-field="question"]').value.trim();
+                const opts={};['A','B','C','D'].forEach(o=>opts[o]=c.querySelector(`[data-field="option${o}"]`).value.trim());
+                const correct=c.querySelector(`input[name="correct_${i}"]:checked`);
+                const dt=c.querySelector('[data-field="displayType"]').value;
+                const limit=c.querySelector('[data-field="limitPerSession"]').value;
+                const ps=c.querySelector('[data-field="passScore"]').value;
+                const id=c.querySelector('[data-field="id"]')?.value;
+                if(!q||Object.values(opts).some(v=>!v)||!correct){showToast(`ข้อมูลไม่ครบ ข้อ ${i+1}`,'warning');ok=false;return;}
+                const qd={category:cat,question:q,option1:opts.A,option2:opts.B,option3:opts.C,option4:opts.D,correct:correct.value,displayType:dt,limitPerSession:parseInt(limit),passScore:parseInt(ps||50),status:'active'};
+                if(id) qd.id=id; questions.push(qd);
             });
-            if (!ok) return;
-            const btn = document.getElementById('saveBtn');
-            const orig = btn.innerHTML;
-            btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin mr-2"></i> กำลังบันทึก...';
-            btn.disabled = true;
-            try {
-                for (const q of questions) {
-                    const p = new URLSearchParams(); p.append('action','saveQuestion');
-                    Object.entries(q).forEach(([k,v]) => p.append(k,v));
-                    const r = await fetch(`${API_ENDPOINT}?${p.toString()}`);
-                    const j = await r.json();
-                    if (!j.success) throw new Error(j.message);
-                }
+            if(!ok) return;
+            const btn=document.getElementById('saveBtn');const orig=btn.innerHTML;btn.innerHTML='<i class="fa-solid fa-spinner fa-spin mr-2"></i> กำลังบันทึก...';btn.disabled=true;
+            try{
+                for(const q of questions){const p=new URLSearchParams();p.append('action','saveQuestion');Object.entries(q).forEach(([k,v])=>p.append(k,v));const r=await fetch(`${API_ENDPOINT}?${p.toString()}`);const j=await r.json();if(!j.success) throw new Error(j.message);}
                 showSuccessPopup(`บันทึกข้อสอบ ${questions.length} ข้อเรียบร้อย!`);
-                document.getElementById('questionsContainer').innerHTML = '';
-                questionCounter = 0;
-                addQuestionCard();
-                document.getElementById('categorySelect').value = '';
-                await loadCategories();
-            } catch(e) { showToast(e.message,'error'); }
-            finally { btn.innerHTML = orig; btn.disabled = false; }
+                document.getElementById('questionsContainer').innerHTML='';questionCounter=0;addQuestionCard();document.getElementById('categorySelect').value='';await loadCategories();
+            }catch(e){showToast(e.message,'error');}finally{btn.innerHTML=orig;btn.disabled=false;}
         }
 
-        async function loadQuestionList() {
-            const container = document.getElementById('questionsList');
-            container.innerHTML = '<div class="text-center py-16"><div class="loader mb-4 mx-auto"></div><p class="text-slate-500 font-light">กำลังโหลด...</p></div>';
-            const category = document.getElementById('filterCategoryM').value;
-            const status = document.getElementById('filterStatusM').value;
-            const search = document.getElementById('searchInput').value.toLowerCase();
-            try {
-                const res = await fetch(`${API_ENDPOINT}?action=getQuestions&category=${category}`);
-                let questions = await res.json();
-                if (status !== 'all') questions = questions.filter(q => q.status === status);
-                if (search) questions = questions.filter(q => q.question.toLowerCase().includes(search) || [q.option1,q.option2,q.option3,q.option4].some(o => o.toLowerCase().includes(search)));
-                document.getElementById('questionCountDisplay').textContent = `พบ ${questions.length} ข้อสอบ`;
-                if (questions.length === 0) { container.innerHTML = '<div class="text-center py-16"><i class="fa-solid fa-folder-open text-5xl text-slate-600 mb-4"></i><p class="text-slate-500 font-light">ไม่พบข้อสอบ</p></div>'; return; }
-                container.innerHTML = questions.map(q => `
+        async function loadQuestionList(){
+            const container=document.getElementById('questionsList');container.innerHTML='<div class="text-center py-16"><div class="loader mb-4 mx-auto"></div><p class="text-slate-500 font-light">กำลังโหลด...</p></div>';
+            const category=document.getElementById('filterCategoryM').value;const status=document.getElementById('filterStatusM').value;const search=document.getElementById('searchInput').value.toLowerCase();
+            try{
+                const res=await fetch(`${API_ENDPOINT}?action=getQuestions&category=${category}`); let questions=await res.json();
+                if(status!=='all') questions=questions.filter(q=>q.status===status);
+                if(search) questions=questions.filter(q=>q.question.toLowerCase().includes(search)||[q.option1,q.option2,q.option3,q.option4].some(o=>o.toLowerCase().includes(search)));
+                document.getElementById('questionCountDisplay').textContent=`พบ ${questions.length} ข้อสอบ`;
+                if(questions.length===0){container.innerHTML='<div class="text-center py-16"><i class="fa-solid fa-folder-open text-5xl text-slate-600 mb-4"></i><p class="text-slate-500 font-light">ไม่พบข้อสอบ</p></div>';return;}
+                container.innerHTML=questions.map(q=>`
                     <div class="card-dark rounded-2xl p-5 border transition-all duration-300 ${q.status==='inactive'?'opacity-50':''}">
                         <div class="flex justify-between items-start mb-3">
                             <div class="flex gap-2 flex-wrap">
                                 <span class="px-3 py-1 text-xs font-medium rounded-full ${q.status==='active'?'bg-green-500/20 text-green-400':'bg-red-500/20 text-red-400'}"><i class="fa-solid ${q.status==='active'?'fa-circle-check':'fa-circle-pause'} mr-1"></i>${q.status==='active'?'ใช้งาน':'ปิดใช้'}</span>
                                 <span class="px-3 py-1 text-xs font-medium bg-slate-700 rounded-full text-slate-300"><i class="fa-solid fa-folder mr-1"></i>${q.category}</span>
-                                <span class="px-3 py-1 text-xs font-medium bg-blue-500/20 text-blue-400 rounded-full"><i class="fa-solid ${q.displayType==='flex'?'fa-mobile-screen':'fa-reply'} mr-1"></i>${q.displayType==='flex'?'Flex':'Quick Reply'}</span>
+                                <span class="px-3 py-1 text-xs font-medium bg-yellow-500/20 text-yellow-400 rounded-full"><i class="fa-solid fa-bullseye mr-1"></i>ผ่าน ${q.passScore||50}%</span>
                             </div>
                             <div class="flex gap-1.5">
                                 <button onclick="toggleStatus('${q.id}','${q.status}')" class="text-xs px-3 py-1.5 rounded-lg font-medium transition-all ${q.status==='active'?'bg-orange-500/20 text-orange-400 hover:bg-orange-500/30':'bg-green-500/20 text-green-400 hover:bg-green-500/30'}"><i class="fa-solid ${q.status==='active'?'fa-pause':'fa-play'}"></i></button>
@@ -274,32 +195,23 @@
                         </div>
                         <h3 class="font-semibold text-white mb-3">${q.question}</h3>
                         <div class="grid grid-cols-2 gap-2 text-sm text-slate-400 mb-3"><div class="bg-dark-900 rounded-lg p-2">A. ${q.option1}</div><div class="bg-dark-900 rounded-lg p-2">B. ${q.option2}</div><div class="bg-dark-900 rounded-lg p-2">C. ${q.option3}</div><div class="bg-dark-900 rounded-lg p-2">D. ${q.option4}</div></div>
-                        <div class="pt-3 border-t border-dark-700 flex justify-between items-center text-xs"><span class="text-line font-bold"><i class="fa-solid fa-check-circle mr-1"></i>เฉลย: ${q.correct}</span><span class="text-slate-500"><i class="fa-solid fa-hashtag mr-1"></i>${q.limitPerSession} ข้อ/ครั้ง</span></div>
+                        <div class="pt-3 border-t border-dark-700 flex justify-between items-center text-xs"><span class="text-line font-bold"><i class="fa-solid fa-check-circle mr-1"></i>เฉลย: ${q.correct}</span><span class="text-slate-500">${q.limitPerSession} ข้อ | ผ่าน ${q.passScore||50}%</span></div>
                     </div>
                 `).join('');
-            } catch(e) { container.innerHTML = '<div class="text-center py-16"><i class="fa-solid fa-triangle-exclamation text-4xl text-red-400 mb-3"></i><p class="text-red-400">เกิดข้อผิดพลาด</p><button onclick="loadQuestionList()" class="mt-3 text-line hover:underline font-medium">ลองใหม่</button></div>'; }
+            }catch(e){container.innerHTML='<div class="text-center py-16"><i class="fa-solid fa-triangle-exclamation text-4xl text-red-400 mb-3"></i><p class="text-red-400">เกิดข้อผิดพลาด</p></div>';}
         }
 
-        async function toggleStatus(id, currentStatus) {
-            const ns = currentStatus === 'active' ? 'inactive' : 'active';
-            const p = new URLSearchParams({action:'toggleQuestionStatus',questionId:id,status:ns});
-            const r = await fetch(`${API_ENDPOINT}?${p.toString()}`);
-            const j = await r.json();
-            if (j.success) { showToast(`${ns==='active'?'เปิด':'ปิด'}ใช้งานเรียบร้อย`,'success'); loadQuestionList(); loadCategories(); }
-            else showToast(j.message,'error');
-        }
+        async function toggleStatus(id,currentStatus){const ns=currentStatus==='active'?'inactive':'active';const p=new URLSearchParams({action:'toggleQuestionStatus',questionId:id,status:ns});const r=await fetch(`${API_ENDPOINT}?${p.toString()}`);const j=await r.json();if(j.success){showToast(`${ns==='active'?'เปิด':'ปิด'}ใช้งานเรียบร้อย`,'success');loadQuestionList();loadCategories();}else showToast(j.message,'error');}
+        async function deleteQ(id){if(!confirm('ยืนยันการลบข้อสอบนี้?')) return;const p=new URLSearchParams({action:'deleteQuestion',questionId:id});const r=await fetch(`${API_ENDPOINT}?${p.toString()}`);const j=await r.json();if(j.success){showToast('ลบข้อสอบเรียบร้อย','success');loadQuestionList();loadCategories();}else showToast(j.message,'error');}
 
-        async function deleteQ(id) {
-            if (!confirm('ยืนยันการลบข้อสอบนี้?')) return;
-            const p = new URLSearchParams({action:'deleteQuestion',questionId:id});
-            const r = await fetch(`${API_ENDPOINT}?${p.toString()}`);
-            const j = await r.json();
-            if (j.success) { showToast('ลบข้อสอบเรียบร้อย','success'); loadQuestionList(); loadCategories(); }
-            else showToast(j.message,'error');
-        }
+        // ✅ ADMIN MANAGEMENT
+        async function loadUsers(){try{const r=await fetch(`${API_ENDPOINT}?action=getUsers`);const d=await r.json();const s=document.getElementById('userSelect');s.innerHTML='<option value="">-- เลือกผู้ใช้ --</option>';d.forEach(u=>{s.innerHTML+=`<option value="${u.userId}">${u.displayName} (${u.userId})</option>`;});}catch(e){}}
+        async function loadAdmins(){try{const r=await fetch(`${API_ENDPOINT}?action=getAdmins`);const d=await r.json();const c=document.getElementById('adminsList');if(d.length===0){c.innerHTML='<div class="text-center py-4 text-slate-500">ไม่มีแอดมิน</div>';return;}c.innerHTML=d.map(a=>`<div class="card-dark rounded-xl p-4 border flex justify-between items-center"><div><span class="font-medium text-white">${a.name}</span><span class="text-xs text-slate-500 ml-2">${a.role}</span><div class="text-xs text-slate-600">${a.userId}</div></div><button onclick="removeAdminById('${a.userId}')" class="text-red-400 hover:text-red-300 text-sm"><i class="fa-solid fa-user-minus"></i></button></div>`).join('');}catch(e){}}
+        async function addNewAdmin(){const uid=document.getElementById('userSelect').value;const role=document.getElementById('roleSelect').value;if(!uid){showToast('เลือกผู้ใช้ก่อน','warning');return;}const p=new URLSearchParams({action:'addAdmin',userId:uid,role:role});const r=await fetch(`${API_ENDPOINT}?${p.toString()}`);const j=await r.json();if(j.success){showToast('เพิ่มแอดมินเรียบร้อย','success');loadAdmins();}else showToast(j.message,'error');}
+        async function removeAdminById(uid){if(!confirm('ลบแอดมินนี้?')) return;const p=new URLSearchParams({action:'removeAdmin',userId:uid});const r=await fetch(`${API_ENDPOINT}?${p.toString()}`);const j=await r.json();if(j.success){showToast('ลบแอดมินเรียบร้อย','success');loadAdmins();}else showToast(j.message,'error');}
 
-        window.addEventListener('DOMContentLoaded', initApp);
-        document.addEventListener('visibilitychange', () => { if (document.visibilityState === 'visible' && currentUser) { loadCategories(); if (!document.getElementById('tabManage').classList.contains('hidden')) loadQuestionList(); } });
+        window.addEventListener('DOMContentLoaded',initApp);
+        document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='visible'&&currentUser){loadCategories();if(!document.getElementById('tabManage').classList.contains('hidden')) loadQuestionList();if(!document.getElementById('tabAdmins').classList.contains('hidden')){loadUsers();loadAdmins();}}});
     </script>
 </body>
 </html>
