@@ -14,18 +14,41 @@
         .card { background: #1e293b; border: 1px solid #334155; border-radius: 16px; padding: 20px; margin-bottom: 12px; }
         .inp { background: #0f172a; border: 1px solid #334155; color: #e2e8f0; padding: 12px 16px; border-radius: 12px; width: 100%; font-size: 14px; margin-bottom: 8px; }
         .inp:focus { outline: none; border-color: #06C755; }
-        .btn { display: block; padding: 14px; border-radius: 12px; font-weight: bold; font-size: 16px; border: none; cursor: pointer; width: 100%; margin-bottom: 8px; text-align: center; }
+        .btn { display: block; padding: 14px; border-radius: 12px; font-weight: bold; font-size: 16px; border: none; cursor: pointer; width: 100%; margin-bottom: 8px; text-align: center; transition: all 0.2s; }
+        .btn:active { transform: scale(0.97); }
         .btn-g { background: #06C755; color: white; }
+        .btn-g:hover { background: #05a34a; }
         .btn-r { background: #dc2626; color: white; }
+        .btn-r:hover { background: #b91c1c; }
         .btn-b { background: #334155; color: white; }
+        .btn-b:hover { background: #475569; }
         .btn-o { background: #f97316; color: white; }
+        .btn-o:hover { background: #ea580c; }
+        .btn:disabled { opacity: 0.6; cursor: not-allowed; transform: none; }
         .tab { padding: 14px 8px; text-align: center; cursor: pointer; flex: 1; color: #94a3b8; border-bottom: 3px solid transparent; transition: all 0.2s; font-size: 13px; }
         .tab-on { color: #06C755 !important; border-bottom: 3px solid #06C755 !important; font-weight: bold !important; }
         .hidden { display: none !important; }
-        .toast { position: fixed; bottom: 20px; left: 20px; right: 20px; background: #1e293b; border: 1px solid #334155; color: white; padding: 16px; border-radius: 12px; text-align: center; z-index: 100; opacity: 0; transition: opacity 0.3s; }
+        
+        /* Toast */
+        .toast { position: fixed; bottom: 20px; left: 20px; right: 20px; background: #1e293b; border: 1px solid #334155; color: white; padding: 16px; border-radius: 12px; text-align: center; z-index: 200; opacity: 0; transition: opacity 0.3s; pointer-events: none; }
         .toast-show { opacity: 1; }
-        .loader { width: 40px; height: 40px; border: 4px solid #334155; border-top: 4px solid #06C755; border-radius: 50%; animation: spin 1s linear infinite; margin: 20px auto; }
+        
+        /* Loading Overlay */
+        .loading-overlay { position: fixed; inset: 0; background: rgba(15, 23, 42, 0.8); backdrop-filter: blur(4px); z-index: 300; display: flex; align-items: center; justify-content: center; opacity: 0; transition: opacity 0.3s; pointer-events: none; }
+        .loading-overlay.show { opacity: 1; pointer-events: all; }
+        .loading-box { background: #1e293b; border: 1px solid #334155; border-radius: 20px; padding: 32px 40px; text-align: center; box-shadow: 0 20px 60px rgba(0,0,0,0.5); }
+        .spinner { width: 48px; height: 48px; border: 4px solid #334155; border-top: 4px solid #06C755; border-radius: 50%; animation: spin 0.8s linear infinite; margin: 0 auto 16px; }
         @keyframes spin { to { transform: rotate(360deg); } }
+        
+        /* Success Popup */
+        .success-overlay { position: fixed; inset: 0; background: rgba(15, 23, 42, 0.85); backdrop-filter: blur(6px); z-index: 400; display: flex; align-items: center; justify-content: center; opacity: 0; transition: opacity 0.3s; pointer-events: none; }
+        .success-overlay.show { opacity: 1; pointer-events: all; }
+        .success-box { background: #1e293b; border: 1px solid #06C755; border-radius: 24px; padding: 40px 32px; text-align: center; box-shadow: 0 20px 60px rgba(6, 199, 85, 0.2); max-width: 340px; width: 90%; animation: popIn 0.4s cubic-bezier(0.68, -0.55, 0.27, 1.55); }
+        @keyframes popIn { 0% { transform: scale(0.5); opacity: 0; } 100% { transform: scale(1); opacity: 1; } }
+        .success-icon { width: 80px; height: 80px; background: rgba(6, 199, 85, 0.15); border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 20px; animation: pulse 2s ease-in-out infinite; }
+        @keyframes pulse { 0%, 100% { box-shadow: 0 0 0 0 rgba(6, 199, 85, 0.4); } 50% { box-shadow: 0 0 0 20px rgba(6, 199, 85, 0); } }
+        
+        .loader { width: 40px; height: 40px; border: 4px solid #334155; border-top: 4px solid #06C755; border-radius: 50%; animation: spin 1s linear infinite; margin: 20px auto; }
         textarea { resize: vertical; min-height: 60px; }
     </style>
 </head>
@@ -64,6 +87,29 @@
 
         <!-- Tab Content -->
         <div id="tabContent" style="padding:16px"></div>
+    </div>
+
+    <!-- Loading Overlay (สำหรับบันทึก) -->
+    <div id="loadingOverlay" class="loading-overlay">
+        <div class="loading-box">
+            <div class="spinner"></div>
+            <p style="color:white;font-size:16px;font-weight:bold" id="loadingTitle">กำลังบันทึก...</p>
+            <p style="color:#94a3b8;font-size:13px;margin-top:4px" id="loadingSub"></p>
+        </div>
+    </div>
+
+    <!-- Success Popup -->
+    <div id="successOverlay" class="success-overlay">
+        <div class="success-box">
+            <div class="success-icon">
+                <i class="fa-solid fa-circle-check" style="font-size:40px;color:#06C755"></i>
+            </div>
+            <h2 style="color:white;font-size:20px;margin-bottom:8px">บันทึกสำเร็จ!</h2>
+            <p id="successMessage" style="color:#94a3b8;font-size:14px;margin-bottom:20px"></p>
+            <button onclick="closeSuccess()" class="btn btn-g" style="width:auto;display:inline-block;padding:12px 32px">
+                <i class="fa-solid fa-check"></i> ตกลง
+            </button>
+        </div>
     </div>
 
     <!-- Toast -->
@@ -125,20 +171,37 @@
             }
         }
 
-        function updateStatus(msg) {
-            document.getElementById('loadingStatus').textContent = msg;
-        }
+        function updateStatus(msg) { document.getElementById('loadingStatus').textContent = msg; }
 
         function showError(msg) {
             document.getElementById('loadingScreen').innerHTML = 
                 '<div style="text-align:center"><i class="fa-solid fa-circle-exclamation" style="font-size:48px;color:#ef4444"></i><p style="color:white;margin-top:16px">' + msg + '</p><button onclick="location.reload()" class="btn btn-g" style="width:auto;margin:16px auto;padding:12px 24px"><i class="fa-solid fa-rotate"></i> ลองใหม่</button></div>';
         }
 
-        function closeApp() {
-            if (liff.isInClient()) liff.closeWindow();
-            else window.close();
+        function closeApp() { if (liff.isInClient()) liff.closeWindow(); else window.close(); }
+
+        // ==================== LOADING OVERLAY ====================
+        function showLoading(title, sub) {
+            document.getElementById('loadingTitle').textContent = title || 'กำลังดำเนินการ...';
+            document.getElementById('loadingSub').textContent = sub || '';
+            document.getElementById('loadingOverlay').classList.add('show');
         }
 
+        function hideLoading() {
+            document.getElementById('loadingOverlay').classList.remove('show');
+        }
+
+        // ==================== SUCCESS POPUP ====================
+        function showSuccess(msg) {
+            document.getElementById('successMessage').textContent = msg || 'ดำเนินการเรียบร้อย!';
+            document.getElementById('successOverlay').classList.add('show');
+        }
+
+        function closeSuccess() {
+            document.getElementById('successOverlay').classList.remove('show');
+        }
+
+        // ==================== TOAST ====================
         function showToast(msg, type) {
             type = type || 'info';
             const icons = {
@@ -177,9 +240,7 @@
                 content.innerHTML = `
                     <div class="card">
                         <label style="font-weight:bold;margin-bottom:8px;display:block"><i class="fa-solid fa-layer-group"></i> เลือกหมวดข้อสอบ</label>
-                        <select id="categorySelect" class="inp">
-                            <option value="">-- เลือกหมวด --</option>
-                        </select>
+                        <select id="categorySelect" class="inp"><option value="">-- เลือกหมวด --</option></select>
                     </div>
                     <div id="questionsContainer"></div>
                     <button class="btn btn-b" onclick="addQuestion()"><i class="fa-solid fa-plus"></i> เพิ่มคำถาม</button>
@@ -192,13 +253,9 @@
                 content.innerHTML = `
                     <div class="card">
                         <label style="font-weight:bold;margin-bottom:8px;display:block"><i class="fa-solid fa-filter"></i> กรองตามหมวด</label>
-                        <select id="filterCategory" class="inp" onchange="loadQuestions()">
-                            <option value="all">ทุกหมวด</option>
-                        </select>
+                        <select id="filterCategory" class="inp" onchange="loadQuestions()"><option value="all">ทุกหมวด</option></select>
                     </div>
-                    <div id="questionsList">
-                        <div class="loader"></div>
-                    </div>
+                    <div id="questionsList"><div class="loader"></div></div>
                 `;
                 loadCategories();
                 loadQuestions();
@@ -207,22 +264,17 @@
                 content.innerHTML = `
                     <div class="card">
                         <h3 style="font-size:18px;margin-bottom:16px"><i class="fa-solid fa-sliders"></i> ตั้งค่าชุดข้อสอบ</h3>
-                        
                         <label style="font-weight:bold;margin-bottom:8px;display:block"><i class="fa-solid fa-layer-group"></i> เลือกหมวด</label>
                         <select id="configCategory" class="inp"><option value="">-- เลือกหมวด --</option></select>
-                        
                         <label style="font-weight:bold;margin-bottom:8px;display:block"><i class="fa-solid fa-mobile-screen"></i> รูปแบบข้อสอบ</label>
                         <select id="configDisplayType" class="inp">
-                            <option value="flex"><i class="fa-solid fa-mobile-screen"></i> Flex Message</option>
-                            <option value="quickReply"><i class="fa-solid fa-reply"></i> Quick Reply</option>
+                            <option value="flex">Flex Message</option>
+                            <option value="quickReply">Quick Reply</option>
                         </select>
-                        
                         <label style="font-weight:bold;margin-bottom:8px;display:block"><i class="fa-solid fa-hashtag"></i> จำนวนข้อต่อครั้ง</label>
                         <input type="number" id="configLimit" class="inp" value="10" min="1" max="50">
-                        
                         <label style="font-weight:bold;margin-bottom:8px;display:block"><i class="fa-solid fa-bullseye"></i> เปอร์เซ็นต์ผ่าน</label>
                         <input type="number" id="configPass" class="inp" value="60" min="0" max="100">
-                        
                         <button class="btn btn-g" onclick="saveConfig()"><i class="fa-solid fa-floppy-disk"></i> บันทึกการตั้งค่า</button>
                     </div>
                 `;
@@ -279,9 +331,7 @@
                     };
                 }
                 
-            } catch(e) {
-                console.error('Load categories error:', e);
-            }
+            } catch(e) { console.error('Load categories error:', e); }
         }
 
         // ==================== ADD QUESTION ====================
@@ -321,9 +371,7 @@
             cards.forEach(function(card, i) {
                 card.setAttribute('data-index', i);
                 card.querySelector('.q-num').textContent = i + 1;
-                card.querySelectorAll('input[type="radio"]').forEach(function(r) {
-                    r.name = 'correct_' + i;
-                });
+                card.querySelectorAll('input[type="radio"]').forEach(function(r) { r.name = 'correct_' + i; });
             });
             questionCount = cards.length;
         }
@@ -342,10 +390,8 @@
                 return;
             }
             
-            var btn = document.getElementById('saveBtn');
-            var origHTML = btn.innerHTML;
-            btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> กำลังบันทึก...';
-            btn.disabled = true;
+            // ✅ แสดง Loading
+            showLoading('กำลังบันทึกข้อสอบ...', 'กรุณารอสักครู่');
             
             try {
                 for (var i = 0; i < cards.length; i++) {
@@ -354,15 +400,9 @@
                     var correctRadio = card.querySelector('input[type="radio"]:checked');
                     var qid = card.querySelector('.q-id') ? card.querySelector('.q-id').value : null;
                     
-                    if (!question) {
-                        throw new Error('กรุณากรอกคำถามข้อที่ ' + (i + 1));
-                    }
+                    if (!question) throw new Error('กรุณากรอกคำถามข้อที่ ' + (i + 1));
+                    if (!correctRadio) throw new Error('กรุณาเลือกคำตอบที่ถูกต้อง ข้อที่ ' + (i + 1));
                     
-                    if (!correctRadio) {
-                        throw new Error('กรุณาเลือกคำตอบที่ถูกต้อง ข้อที่ ' + (i + 1));
-                    }
-                    
-                    // ✅ ใช้ FormData หรือ POST แทน URL params
                     var formData = new FormData();
                     formData.append('action', 'saveQuestion');
                     formData.append('category', cat.value);
@@ -370,8 +410,7 @@
                     formData.append('correct', correctRadio.value);
                     
                     ['A','B','C','D'].forEach(function(o) {
-                        var val = card.querySelector('[data-opt="' + o + '"]').value.trim();
-                        formData.append('option' + o, val);
+                        formData.append('option' + o, card.querySelector('[data-opt="' + o + '"]').value.trim());
                     });
                     
                     if (qid) formData.append('id', qid);
@@ -379,13 +418,14 @@
                     var r = await fetch(API_URL, { method: 'POST', body: formData });
                     var d = await r.json();
                     
-                    if (!d.success) {
-                        throw new Error(d.message || 'บันทึกไม่สำเร็จ');
-                    }
+                    if (!d.success) throw new Error(d.message || 'บันทึกไม่สำเร็จ');
                 }
                 
-                showToast('บันทึกข้อสอบ ' + cards.length + ' ข้อเรียบร้อย!', 'success');
+                // ✅ ซ่อน Loading → แสดง Success Popup
+                hideLoading();
+                showSuccess('บันทึกข้อสอบ <b>' + cards.length + '</b> ข้อเรียบร้อย!');
                 
+                // รีเซ็ตฟอร์ม
                 document.getElementById('questionsContainer').innerHTML = '';
                 questionCount = 0;
                 addQuestion();
@@ -393,24 +433,20 @@
                 await loadCategories();
                 
             } catch(e) {
+                hideLoading();
                 showToast(e.message, 'error');
-            } finally {
-                btn.innerHTML = origHTML;
-                btn.disabled = false;
             }
         }
 
-        // ==================== LOAD QUESTIONS (MANAGE) ====================
+        // ==================== LOAD / TOGGLE / DELETE QUESTIONS ====================
         async function loadQuestions() {
             var container = document.getElementById('questionsList');
             if (!container) return;
-            
             container.innerHTML = '<div class="loader"></div>';
             
             try {
                 var cat = document.getElementById('filterCategory');
                 var category = cat ? cat.value : 'all';
-                
                 var r = await fetch(API_URL + '?action=getQuestions&category=' + category);
                 var questions = await r.json();
                 
@@ -426,15 +462,10 @@
                                 <span style="background:${q.status === 'active' ? '#16a34a' : '#dc2626'};color:white;padding:2px 10px;border-radius:20px;font-size:12px">
                                     <i class="fa-solid ${q.status === 'active' ? 'fa-circle-check' : 'fa-circle-pause'}"></i> ${q.status === 'active' ? 'ใช้งาน' : 'ปิด'}
                                 </span>
-                                <span style="background:#334155;padding:2px 10px;border-radius:20px;font-size:12px">
-                                    <i class="fa-solid fa-folder"></i> ${q.category}
-                                </span>
+                                <span style="background:#334155;padding:2px 10px;border-radius:20px;font-size:12px"><i class="fa-solid fa-folder"></i> ${q.category}</span>
                             </div>
                             <h3 style="font-size:16px;margin-bottom:8px">${q.question}</h3>
-                            <div style="font-size:13px;color:#94a3b8;margin-bottom:8px">
-                                A. ${q.option1} &nbsp; B. ${q.option2}<br>
-                                C. ${q.option3} &nbsp; D. ${q.option4}
-                            </div>
+                            <div style="font-size:13px;color:#94a3b8;margin-bottom:8px">A. ${q.option1} &nbsp; B. ${q.option2}<br>C. ${q.option3} &nbsp; D. ${q.option4}</div>
                             <div style="color:#06C755;font-size:13px;margin-bottom:8px"><i class="fa-solid fa-check-circle"></i> คำตอบ: ${q.correct}</div>
                             <div style="display:flex;gap:8px">
                                 <button class="btn btn-o" style="flex:1;font-size:13px;padding:8px" onclick="toggleQuestion('${q.id}','${q.status}')">
@@ -447,36 +478,31 @@
                         </div>
                     `;
                 }).join('');
-                
             } catch(e) {
                 container.innerHTML = '<div style="text-align:center;color:#ef4444"><i class="fa-solid fa-triangle-exclamation"></i> เกิดข้อผิดพลาด</div>';
             }
         }
 
-        // ==================== TOGGLE / DELETE ====================
         async function toggleQuestion(id, status) {
             var newStatus = status === 'active' ? 'inactive' : 'active';
             await fetch(API_URL + '?action=toggleQuestionStatus&questionId=' + id + '&status=' + newStatus);
             showToast((newStatus === 'active' ? 'เปิด' : 'ปิด') + 'ใช้งานเรียบร้อย', 'success');
-            loadQuestions();
-            loadCategories();
+            loadQuestions(); loadCategories();
         }
 
         async function deleteQuestion(id) {
             if (!confirm('ยืนยันการลบข้อสอบนี้?')) return;
             await fetch(API_URL + '?action=deleteQuestion&questionId=' + id);
             showToast('ลบข้อสอบเรียบร้อย', 'success');
-            loadQuestions();
-            loadCategories();
+            loadQuestions(); loadCategories();
         }
 
         // ==================== SAVE CONFIG ====================
         async function saveConfig() {
             var cat = document.getElementById('configCategory').value;
-            if (!cat) {
-                showToast('กรุณาเลือกหมวดข้อสอบ', 'warning');
-                return;
-            }
+            if (!cat) { showToast('กรุณาเลือกหมวดข้อสอบ', 'warning'); return; }
+            
+            showLoading('กำลังบันทึกการตั้งค่า...', cat);
             
             var formData = new FormData();
             formData.append('action', 'saveExamConfig');
@@ -488,13 +514,15 @@
             try {
                 var r = await fetch(API_URL, { method: 'POST', body: formData });
                 var d = await r.json();
+                hideLoading();
                 if (d.success) {
-                    showToast('บันทึกการตั้งค่าเรียบร้อย!', 'success');
+                    showSuccess('ตั้งค่าหมวด <b>' + cat + '</b> เรียบร้อย!');
                     loadCategories();
                 } else {
                     showToast(d.message || 'บันทึกไม่สำเร็จ', 'error');
                 }
             } catch(e) {
+                hideLoading();
                 showToast('เกิดข้อผิดพลาด', 'error');
             }
         }
@@ -504,23 +532,17 @@
             try {
                 var r = await fetch(API_URL + '?action=getUsers');
                 var users = await r.json();
-                
                 var select = document.getElementById('userSelect');
                 if (select) {
                     select.innerHTML = '<option value="">-- เลือกผู้ใช้ --</option>' + 
-                        users.map(function(u) { 
-                            return '<option value="' + u.userId + '">' + u.displayName + ' (' + u.userId + ')</option>'; 
-                        }).join('');
+                        users.map(function(u) { return '<option value="' + u.userId + '">' + u.displayName + '</option>'; }).join('');
                 }
-            } catch(e) {
-                console.error('Load users error:', e);
-            }
+            } catch(e) {}
         }
 
         async function loadAdmins() {
             var container = document.getElementById('adminsList');
             if (!container) return;
-            
             container.innerHTML = '<div class="loader"></div>';
             
             try {
@@ -538,58 +560,30 @@
                             <div>
                                 <div style="font-weight:bold;color:white">${a.name}</div>
                                 <div style="font-size:12px;color:#94a3b8">${a.role}</div>
-                                <div style="font-size:11px;color:#64748b">${a.userId}</div>
                             </div>
                             <button class="btn btn-r" style="width:auto;padding:8px 16px;font-size:13px" onclick="removeAdminUser('${a.userId}')">
-                                <i class="fa-solid fa-trash-can"></i> ลบ
+                                <i class="fa-solid fa-trash-can"></i>
                             </button>
                         </div>
                     `;
                 }).join('');
-                
-            } catch(e) {
-                container.innerHTML = '<div style="text-align:center;color:#ef4444"><i class="fa-solid fa-triangle-exclamation"></i> เกิดข้อผิดพลาด</div>';
-            }
+            } catch(e) {}
         }
 
         async function addAdminUser() {
             var select = document.getElementById('userSelect');
-            if (!select || !select.value) {
-                showToast('กรุณาเลือกผู้ใช้ก่อน', 'warning');
-                return;
-            }
+            if (!select || !select.value) { showToast('กรุณาเลือกผู้ใช้ก่อน', 'warning'); return; }
             
-            try {
-                var r = await fetch(API_URL + '?action=addAdmin&userId=' + encodeURIComponent(select.value));
-                var d = await r.json();
-                
-                if (d.success) {
-                    showToast('เพิ่มแอดมินเรียบร้อย!', 'success');
-                    loadAdmins();
-                } else {
-                    showToast(d.message || 'เพิ่มไม่สำเร็จ', 'error');
-                }
-            } catch(e) {
-                showToast('เกิดข้อผิดพลาด', 'error');
-            }
+            await fetch(API_URL + '?action=addAdmin&userId=' + encodeURIComponent(select.value));
+            showToast('เพิ่มแอดมินเรียบร้อย!', 'success');
+            loadAdmins();
         }
 
         async function removeAdminUser(uid) {
             if (!confirm('ยืนยันการลบแอดมินนี้?')) return;
-            
-            try {
-                var r = await fetch(API_URL + '?action=removeAdmin&userId=' + uid);
-                var d = await r.json();
-                
-                if (d.success) {
-                    showToast('ลบแอดมินเรียบร้อย!', 'success');
-                    loadAdmins();
-                } else {
-                    showToast(d.message || 'ลบไม่สำเร็จ', 'error');
-                }
-            } catch(e) {
-                showToast('เกิดข้อผิดพลาด', 'error');
-            }
+            await fetch(API_URL + '?action=removeAdmin&userId=' + uid);
+            showToast('ลบแอดมินเรียบร้อย!', 'success');
+            loadAdmins();
         }
 
         // ==================== START ====================
