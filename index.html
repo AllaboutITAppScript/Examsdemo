@@ -1,0 +1,791 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>ระบบจัดการข้อสอบ</title>
+    
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        line: '#06C755',
+                        'line-dark': '#00B900',
+                        'line-light': '#E8F5E9'
+                    }
+                }
+            }
+        }
+    </script>
+    
+    <!-- LINE LIFF SDK -->
+    <script src="https://static.line-scdn.net/liff/edge/2/sdk.js"></script>
+    
+    <style>
+        * {
+            font-family: -apple-system, BlinkMacSystemFont, 'Sarabun', 'Kanit', sans-serif;
+        }
+        
+        .gradient-bg {
+            background: linear-gradient(135deg, #06C755 0%, #00B900 100%);
+        }
+        
+        .tab-active {
+            color: #06C755 !important;
+            border-bottom: 3px solid #06C755 !important;
+            font-weight: 700 !important;
+        }
+        
+        .fade-in {
+            animation: fadeIn 0.3s ease-in-out;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        @keyframes slideUp {
+            from { transform: translateY(20px); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
+        }
+        
+        .toast-enter {
+            animation: slideUp 0.3s ease-out;
+        }
+        
+        .loader {
+            width: 24px;
+            height: 24px;
+            border: 3px solid #f3f3f3;
+            border-top: 3px solid #06C755;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            display: inline-block;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        body {
+            -webkit-tap-highlight-color: transparent;
+            overscroll-behavior: none;
+            touch-action: manipulation;
+        }
+        
+        .btn-press:active {
+            transform: scale(0.96);
+        }
+        
+        input:focus, select:focus, textarea:focus {
+            outline: none;
+            border-color: #06C755 !important;
+            box-shadow: 0 0 0 3px rgba(6, 199, 85, 0.1);
+        }
+        
+        select {
+            appearance: none;
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3E%3Cpath stroke='%236B7280' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='M6 8l4 4 4-4'/%3E%3C/svg%3E");
+            background-position: right 0.5rem center;
+            background-repeat: no-repeat;
+            background-size: 1.5em 1.5em;
+            padding-right: 2.5rem;
+        }
+    </style>
+</head>
+<body class="bg-gray-50 min-h-screen">
+    <!-- Loading Screen -->
+    <div id="loadingScreen" class="fixed inset-0 bg-white bg-opacity-95 z-50 flex items-center justify-center">
+        <div class="text-center">
+            <div class="loader mb-4" style="width: 48px; height: 48px; border-width: 4px;"></div>
+            <p class="text-gray-600 font-medium">กำลังโหลดระบบ...</p>
+        </div>
+    </div>
+
+    <!-- Access Denied Screen -->
+    <div id="accessDenied" class="hidden min-h-screen flex items-center justify-center p-8">
+        <div class="text-center max-w-sm">
+            <div class="text-7xl mb-6">⛔</div>
+            <h1 class="text-2xl font-bold text-gray-800 mb-2">ไม่มีสิทธิ์เข้าถึง</h1>
+            <p class="text-gray-600 mb-6">คุณไม่ใช่แอดมินของระบบ</p>
+            <button onclick="closeApp()" 
+                    class="gradient-bg text-white px-8 py-3 rounded-xl font-medium hover:shadow-lg transition-all">
+                ปิดหน้านี้
+            </button>
+        </div>
+    </div>
+
+    <!-- Main App -->
+    <div id="mainApp" class="hidden max-w-lg mx-auto bg-white min-h-screen shadow-lg">
+        <!-- Header -->
+        <div class="gradient-bg text-white p-6 rounded-b-3xl shadow-lg sticky top-0 z-20">
+            <div class="flex items-center justify-between">
+                <div>
+                    <h1 class="text-2xl font-bold">📚 จัดการข้อสอบ</h1>
+                    <p id="userDisplayName" class="text-sm opacity-90 mt-1">กำลังโหลด...</p>
+                </div>
+                <button onclick="closeApp()" 
+                        class="bg-white bg-opacity-20 hover:bg-opacity-30 p-2 rounded-lg transition-all">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                    </svg>
+                </button>
+            </div>
+        </div>
+
+        <!-- Tab Navigation -->
+        <nav class="flex border-b bg-white sticky top-[88px] z-10">
+            <button onclick="switchTab('create')" id="tabCreateBtn" 
+                    class="tab-active flex-1 py-4 text-center font-medium transition-all duration-200">
+                <span class="mr-1">➕</span> สร้างข้อสอบ
+            </button>
+            <button onclick="switchTab('manage')" id="tabManageBtn" 
+                    class="flex-1 py-4 text-center font-medium text-gray-500 transition-all duration-200">
+                <span class="mr-1">📋</span> จัดการข้อสอบ
+            </button>
+        </nav>
+
+        <!-- Tab 1: Create Exam -->
+        <section id="tabCreate" class="p-4 fade-in">
+            <!-- Category -->
+            <div class="mb-6">
+                <label class="block text-sm font-semibold mb-2 text-gray-700">
+                    📂 เลือกหมวดหมู่ <span class="text-red-500">*</span>
+                </label>
+                <select id="categorySelect" class="w-full p-3 border-2 border-gray-200 rounded-lg bg-white">
+                    <option value="">-- เลือกหมวดข้อสอบ --</option>
+                </select>
+            </div>
+
+            <!-- Questions Container -->
+            <div id="questionsContainer" class="space-y-4"></div>
+
+            <!-- Add Question -->
+            <button onclick="addQuestionCard()" 
+                    class="w-full mt-4 p-4 border-2 border-dashed border-gray-300 rounded-xl text-gray-500 hover:border-line hover:text-line hover:bg-line-light transition-all duration-200 font-medium">
+                <span class="text-lg">+</span> เพิ่มคำถามอีกข้อ
+            </button>
+
+            <!-- Save -->
+            <button onclick="saveAllQuestions()" id="saveBtn"
+                    class="w-full mt-6 gradient-bg text-white p-4 rounded-xl font-bold text-lg hover:shadow-lg transition-all duration-200 btn-press">
+                💾 บันทึกข้อสอบทั้งหมด
+            </button>
+        </section>
+
+        <!-- Tab 2: Manage Exam -->
+        <section id="tabManage" class="p-4 hidden">
+            <!-- Filters -->
+            <div class="flex gap-2 mb-4">
+                <select id="filterCategoryM" onchange="loadQuestionList()" 
+                        class="flex-1 p-3 border-2 border-gray-200 rounded-lg text-sm bg-white">
+                    <option value="all">📂 ทุกหมวดหมู่</option>
+                </select>
+                <select id="filterStatusM" onchange="loadQuestionList()" 
+                        class="flex-1 p-3 border-2 border-gray-200 rounded-lg text-sm bg-white">
+                    <option value="all">📊 ทุกสถานะ</option>
+                    <option value="active">🟢 ใช้งานอยู่</option>
+                    <option value="inactive">🔴 ปิดใช้งาน</option>
+                </select>
+            </div>
+
+            <!-- Search -->
+            <div class="mb-4">
+                <input type="text" id="searchInput" oninput="loadQuestionList()" 
+                       placeholder="🔍 ค้นหาคำถาม..."
+                       class="w-full p-3 border-2 border-gray-200 rounded-lg text-sm">
+            </div>
+
+            <!-- Count -->
+            <p id="questionCountDisplay" class="text-sm text-gray-500 mb-3"></p>
+
+            <!-- Questions List -->
+            <div id="questionsList" class="space-y-3">
+                <div class="text-center py-12">
+                    <div class="loader mb-3"></div>
+                    <p class="text-gray-500">กำลังโหลดข้อสอบ...</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- Toast -->
+        <div id="toast" class="fixed bottom-24 left-4 right-4 mx-auto max-w-sm opacity-0 pointer-events-none transition-all duration-300 z-50" style="transform: translateY(20px);">
+            <div id="toastContent" class="bg-gray-800 text-white p-4 rounded-xl shadow-2xl text-center text-sm font-medium">
+                <span id="toastMessage"></span>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // ========== CONFIG ==========
+        // ⚠️ ใส่ Google Apps Script Web App URL ของคุณที่นี่
+        const API_ENDPOINT = 'https://script.google.com/macros/s/YOUR_SCRIPT_ID/exec';
+        
+        // ⚠️ ใส่ LIFF ID ของคุณที่นี่
+        const LIFF_ID = 'YOUR_LIFF_ID';
+
+        // ========== STATE ==========
+        let currentUser = null;
+        let isAdmin = false;
+        let questionCounter = 0;
+        let toastTimeout = null;
+        let allQuestions = []; // Cache สำหรับ tab manage
+
+        // ========== INITIALIZATION ==========
+        async function initApp() {
+            try {
+                // 1. Init LIFF
+                await liff.init({ liffId: LIFF_ID });
+                
+                // 2. Login if needed
+                if (!liff.isLoggedIn()) {
+                    await liff.login();
+                }
+                
+                // 3. Get profile
+                currentUser = await liff.getProfile();
+                document.getElementById('userDisplayName').textContent = 
+                    `👤 ${currentUser.displayName}`;
+                
+                // 4. Check friendship & request if not
+                await checkAndRequestFriendship();
+                
+                // 5. Verify admin
+                isAdmin = await verifyAdminStatus();
+                
+                if (!isAdmin) {
+                    showAccessDenied();
+                    return;
+                }
+                
+                // 6. Load data & show app
+                await loadCategories();
+                addQuestionCard(); // First empty question
+                showMainApp();
+                
+            } catch (error) {
+                console.error('Init error:', error);
+                hideLoadingScreen();
+                showToast('❌ เกิดข้อผิดพลาด: ' + error.message, 'error');
+            }
+        }
+
+        async function checkAndRequestFriendship() {
+            try {
+                const friendship = await liff.getFriendship();
+                
+                if (!friendship.friendFlag) {
+                    // Show request friendship dialog (in-app)
+                    await liff.requestFriendship();
+                    
+                    // Verify after request
+                    const verify = await liff.getFriendship();
+                    if (verify.friendFlag) {
+                        showToast('✅ ขอบคุณที่เพิ่มเพื่อน! 🎉', 'success');
+                    }
+                }
+            } catch (error) {
+                console.error('Friendship check error:', error);
+                // Continue anyway - friendship is optional
+            }
+        }
+
+        async function verifyAdminStatus() {
+            try {
+                const response = await fetch(`${API_ENDPOINT}?action=checkAdmin&userId=${currentUser.userId}`);
+                const data = await response.json();
+                return data.isAdmin === true;
+            } catch (error) {
+                console.error('Admin check error:', error);
+                return false;
+            }
+        }
+
+        // ========== UI HELPERS ==========
+        function hideLoadingScreen() {
+            document.getElementById('loadingScreen').style.display = 'none';
+        }
+
+        function showAccessDenied() {
+            hideLoadingScreen();
+            document.getElementById('accessDenied').classList.remove('hidden');
+            document.getElementById('mainApp').classList.add('hidden');
+        }
+
+        function showMainApp() {
+            hideLoadingScreen();
+            document.getElementById('accessDenied').classList.add('hidden');
+            document.getElementById('mainApp').classList.remove('hidden');
+        }
+
+        function closeApp() {
+            if (liff.isInClient()) {
+                liff.closeWindow();
+            } else {
+                window.close();
+            }
+        }
+
+        // ========== TOAST ==========
+        function showToast(message, type = 'info') {
+            const toast = document.getElementById('toast');
+            const toastContent = document.getElementById('toastContent');
+            const toastMessage = document.getElementById('toastMessage');
+            
+            // Set color
+            const colors = {
+                success: 'bg-green-600',
+                error: 'bg-red-600',
+                warning: 'bg-orange-500',
+                info: 'bg-gray-800'
+            };
+            toastContent.className = `${colors[type] || colors.info} text-white p-4 rounded-xl shadow-2xl text-center text-sm font-medium`;
+            
+            toastMessage.textContent = message;
+            toast.classList.add('toast-enter');
+            toast.style.opacity = '1';
+            toast.style.transform = 'translateY(0)';
+            toast.style.pointerEvents = 'auto';
+            
+            if (toastTimeout) clearTimeout(toastTimeout);
+            
+            toastTimeout = setTimeout(() => {
+                toast.style.opacity = '0';
+                toast.style.transform = 'translateY(20px)';
+                toast.style.pointerEvents = 'none';
+            }, 3000);
+        }
+
+        // ========== TAB SWITCHING ==========
+        function switchTab(tab) {
+            const createBtn = document.getElementById('tabCreateBtn');
+            const manageBtn = document.getElementById('tabManageBtn');
+            const createContent = document.getElementById('tabCreate');
+            const manageContent = document.getElementById('tabManage');
+            
+            // Reset
+            [createBtn, manageBtn].forEach(btn => {
+                btn.classList.remove('tab-active');
+                btn.classList.add('text-gray-500');
+            });
+            createContent.classList.add('hidden');
+            manageContent.classList.add('hidden');
+            
+            if (tab === 'create') {
+                createBtn.classList.add('tab-active');
+                createBtn.classList.remove('text-gray-500');
+                createContent.classList.remove('hidden');
+                createContent.classList.add('fade-in');
+            } else {
+                manageBtn.classList.add('tab-active');
+                manageBtn.classList.remove('text-gray-500');
+                manageContent.classList.remove('hidden');
+                manageContent.classList.add('fade-in');
+                loadQuestionList();
+            }
+        }
+
+        // ========== LOAD CATEGORIES ==========
+        async function loadCategories() {
+            try {
+                const response = await fetch(`${API_ENDPOINT}?action=getCategories`);
+                const categories = await response.json();
+                
+                // Populate Create tab
+                const createSelect = document.getElementById('categorySelect');
+                createSelect.innerHTML = '<option value="">-- เลือกหมวดข้อสอบ --</option>';
+                categories.forEach(cat => {
+                    createSelect.innerHTML += `<option value="${cat.name}">${cat.name} (${cat.questionCount || 0} ข้อ)</option>`;
+                });
+                
+                // Populate Manage tab filter
+                const filterSelect = document.getElementById('filterCategoryM');
+                filterSelect.innerHTML = '<option value="all">📂 ทุกหมวดหมู่</option>';
+                categories.forEach(cat => {
+                    filterSelect.innerHTML += `<option value="${cat.name}">${cat.name}</option>`;
+                });
+                
+            } catch (error) {
+                console.error('Load categories error:', error);
+                showToast('⚠️ ไม่สามารถโหลดหมวดข้อสอบได้', 'error');
+            }
+        }
+
+        // ========== QUESTION CARDS (CREATE TAB) ==========
+        function addQuestionCard(questionData = null) {
+            const container = document.getElementById('questionsContainer');
+            const index = questionCounter;
+            
+            const card = document.createElement('div');
+            card.className = 'question-card bg-gray-50 rounded-xl p-4 border-2 border-gray-200 fade-in';
+            card.dataset.index = index;
+            card.innerHTML = `
+                <div class="flex justify-between items-center mb-3">
+                    <span class="text-sm font-semibold text-gray-600">📝 ข้อที่ <span class="q-num">${index + 1}</span></span>
+                    <button type="button" onclick="removeQuestionCard(this)" 
+                            class="text-red-500 hover:text-red-700 text-sm font-medium transition-colors">
+                        🗑 ลบ
+                    </button>
+                </div>
+                
+                <textarea data-field="question" 
+                          class="w-full p-3 border-2 border-gray-200 rounded-lg mb-3" 
+                          rows="2" placeholder="พิมพ์คำถามที่นี่...">${questionData?.question || ''}</textarea>
+                
+                <div class="space-y-2 mb-3">
+                    ${['A', 'B', 'C', 'D'].map(opt => `
+                        <div class="flex items-center space-x-2">
+                            <input type="radio" name="correct_${index}" value="${opt}" 
+                                   class="w-4 h-4 text-line" ${questionData?.correct === opt ? 'checked' : ''}>
+                            <span class="font-medium w-6">${opt}.</span>
+                            <input type="text" data-field="option${opt}" 
+                                   class="flex-1 p-2 border-2 border-gray-200 rounded-lg text-sm" 
+                                   placeholder="ตัวเลือก ${opt}" value="${questionData?.['option' + (['A','B','C','D'].indexOf(opt)+1)] || ''}">
+                        </div>
+                    `).join('')}
+                </div>
+                
+                <div class="grid grid-cols-2 gap-2">
+                    <select data-field="displayType" class="p-2 border-2 border-gray-200 rounded-lg text-sm bg-white">
+                        <option value="flex" ${questionData?.displayType === 'flex' ? 'selected' : ''}>📱 Flex Message</option>
+                        <option value="quickReply" ${questionData?.displayType === 'quickReply' ? 'selected' : ''}>💬 Quick Reply</option>
+                    </select>
+                    <input type="number" data-field="limitPerSession" 
+                           class="p-2 border-2 border-gray-200 rounded-lg text-sm" 
+                           value="${questionData?.limitPerSession || 10}" min="1" max="50">
+                </div>
+                
+                ${questionData?.id ? `<input type="hidden" data-field="id" value="${questionData.id}">` : ''}
+            `;
+            
+            container.appendChild(card);
+            questionCounter++;
+        }
+
+        function removeQuestionCard(button) {
+            const container = document.getElementById('questionsContainer');
+            const cards = container.querySelectorAll('.question-card');
+            
+            if (cards.length <= 1) {
+                showToast('⚠️ ต้องมีอย่างน้อย 1 คำถาม', 'warning');
+                return;
+            }
+            
+            button.closest('.question-card').remove();
+            reindexCards();
+        }
+
+        function reindexCards() {
+            const cards = document.querySelectorAll('.question-card');
+            cards.forEach((card, i) => {
+                card.dataset.index = i;
+                card.querySelector('.q-num').textContent = i + 1;
+                
+                // Update radio names
+                const radios = card.querySelectorAll('input[type="radio"]');
+                radios.forEach(r => r.name = `correct_${i}`);
+            });
+            questionCounter = cards.length;
+        }
+
+        // ========== SAVE QUESTIONS ==========
+        async function saveAllQuestions() {
+            const category = document.getElementById('categorySelect').value;
+            
+            if (!category) {
+                showToast('⚠️ กรุณาเลือกหมวดข้อสอบ', 'warning');
+                document.getElementById('categorySelect').classList.add('border-red-500');
+                setTimeout(() => document.getElementById('categorySelect').classList.remove('border-red-500'), 2000);
+                return;
+            }
+            
+            const cards = document.querySelectorAll('.question-card');
+            const questions = [];
+            let isValid = true;
+            
+            cards.forEach((card, i) => {
+                const question = card.querySelector('[data-field="question"]').value.trim();
+                const options = {};
+                ['A', 'B', 'C', 'D'].forEach(opt => {
+                    options[opt] = card.querySelector(`[data-field="option${opt}"]`).value.trim();
+                });
+                const correct = card.querySelector(`input[name="correct_${i}"]:checked`);
+                const displayType = card.querySelector('[data-field="displayType"]').value;
+                const limit = card.querySelector('[data-field="limitPerSession"]').value;
+                const id = card.querySelector('[data-field="id"]')?.value;
+                
+                if (!question || Object.values(options).some(v => !v) || !correct) {
+                    showToast(`⚠️ กรุณากรอกข้อมูลให้ครบ ข้อ ${i + 1}`, 'warning');
+                    isValid = false;
+                    return;
+                }
+                
+                const qData = {
+                    category: category,
+                    question: question,
+                    option1: options.A,
+                    option2: options.B,
+                    option3: options.C,
+                    option4: options.D,
+                    correct: correct.value,
+                    displayType: displayType,
+                    limitPerSession: parseInt(limit),
+                    status: 'active'
+                };
+                
+                if (id) qData.id = id;
+                
+                questions.push(qData);
+            });
+            
+            if (!isValid) return;
+            
+            // Show loading
+            const saveBtn = document.getElementById('saveBtn');
+            const originalHTML = saveBtn.innerHTML;
+            saveBtn.innerHTML = '<span class="loader"></span> กำลังบันทึก...';
+            saveBtn.disabled = true;
+            
+            try {
+                for (const q of questions) {
+                    const params = new URLSearchParams();
+                    params.append('action', 'saveQuestion');
+                    Object.entries(q).forEach(([key, value]) => {
+                        params.append(key, value);
+                    });
+                    
+                    const response = await fetch(`${API_ENDPOINT}?${params.toString()}`);
+                    const result = await response.json();
+                    
+                    if (!result.success) {
+                        throw new Error(result.message || 'บันทึกไม่สำเร็จ');
+                    }
+                }
+                
+                showToast(`✅ บันทึกข้อสอบ ${questions.length} ข้อเรียบร้อย!`, 'success');
+                
+                // Reset form
+                document.getElementById('questionsContainer').innerHTML = '';
+                questionCounter = 0;
+                addQuestionCard();
+                document.getElementById('categorySelect').value = '';
+                
+                // Refresh categories
+                await loadCategories();
+                
+            } catch (error) {
+                console.error('Save error:', error);
+                showToast('❌ เกิดข้อผิดพลาด: ' + error.message, 'error');
+            } finally {
+                saveBtn.innerHTML = originalHTML;
+                saveBtn.disabled = false;
+            }
+        }
+
+        // ========== LOAD QUESTIONS (MANAGE TAB) ==========
+        async function loadQuestionList() {
+            const container = document.getElementById('questionsList');
+            const countDisplay = document.getElementById('questionCountDisplay');
+            
+            container.innerHTML = `<div class="text-center py-12"><div class="loader mb-3"></div><p class="text-gray-500">กำลังโหลด...</p></div>`;
+            
+            const category = document.getElementById('filterCategoryM').value;
+            const status = document.getElementById('filterStatusM').value;
+            const search = document.getElementById('searchInput').value.toLowerCase();
+            
+            try {
+                const response = await fetch(`${API_ENDPOINT}?action=getQuestions&category=${category}`);
+                let questions = await response.json();
+                
+                // Client-side filtering
+                if (status !== 'all') {
+                    questions = questions.filter(q => q.status === status);
+                }
+                if (search) {
+                    questions = questions.filter(q => 
+                        q.question.toLowerCase().includes(search) ||
+                        [q.option1, q.option2, q.option3, q.option4].some(o => o.toLowerCase().includes(search))
+                    );
+                }
+                
+                countDisplay.textContent = `📊 พบ ${questions.length} ข้อสอบ`;
+                
+                if (questions.length === 0) {
+                    container.innerHTML = `
+                        <div class="text-center py-12 bg-gray-50 rounded-xl">
+                            <div class="text-5xl mb-4">📭</div>
+                            <p class="text-gray-600 font-medium">ไม่พบข้อสอบ</p>
+                            <p class="text-gray-500 text-sm mt-2">ลองเปลี่ยนตัวกรอง หรือสร้างข้อสอบใหม่</p>
+                        </div>
+                    `;
+                    return;
+                }
+                
+                container.innerHTML = questions.map(q => `
+                    <div class="bg-white border-2 border-gray-200 rounded-xl p-4 hover:border-line transition-all ${q.status === 'inactive' ? 'opacity-60' : ''}">
+                        <div class="flex justify-between items-start mb-3">
+                            <div class="flex gap-2 flex-wrap">
+                                <span class="px-2 py-1 text-xs font-medium rounded-full ${q.status === 'active' ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'}">
+                                    ${q.status === 'active' ? '🟢 ใช้งาน' : '🔴 ปิด'}
+                                </span>
+                                <span class="px-2 py-1 text-xs font-medium bg-gray-100 rounded-full">📂 ${q.category}</span>
+                                <span class="px-2 py-1 text-xs font-medium bg-blue-100 text-blue-700 rounded-full">
+                                    ${q.displayType === 'flex' ? '📱 Flex' : '💬 Quick Reply'}
+                                </span>
+                            </div>
+                            <div class="flex gap-1">
+                                <button onclick="editExistingQuestion('${q.id}')" 
+                                        class="text-xs px-3 py-1 rounded-lg bg-blue-100 text-blue-700 hover:bg-blue-200 transition-colors font-medium">
+                                    ✏️ แก้ไข
+                                </button>
+                                <button onclick="toggleStatus('${q.id}', '${q.status}')" 
+                                        class="text-xs px-3 py-1 rounded-lg ${q.status === 'active' ? 'bg-orange-100 text-orange-700' : 'bg-green-100 text-green-700'} hover:opacity-80 transition-colors font-medium">
+                                    ${q.status === 'active' ? '⏸ ปิด' : '▶️ เปิด'}
+                                </button>
+                                <button onclick="deleteById('${q.id}')" 
+                                        class="text-xs px-3 py-1 rounded-lg bg-red-100 text-red-700 hover:bg-red-200 transition-colors font-medium">
+                                    🗑 ลบ
+                                </button>
+                            </div>
+                        </div>
+                        <h3 class="font-semibold text-gray-800 mb-2">${q.question}</h3>
+                        <div class="grid grid-cols-2 gap-1 text-sm text-gray-600 mb-2">
+                            <div>A. ${q.option1}</div>
+                            <div>B. ${q.option2}</div>
+                            <div>C. ${q.option3}</div>
+                            <div>D. ${q.option4}</div>
+                        </div>
+                        <div class="pt-2 border-t flex justify-between items-center text-xs">
+                            <span class="text-line font-bold">✅ เฉลย: ${q.correct}</span>
+                            <span class="text-gray-400">จำกัด ${q.limitPerSession} ข้อ/ครั้ง</span>
+                        </div>
+                    </div>
+                `).join('');
+                
+            } catch (error) {
+                console.error('Load questions error:', error);
+                container.innerHTML = `
+                    <div class="text-center py-12">
+                        <p class="text-red-600">❌ เกิดข้อผิดพลาด</p>
+                        <button onclick="loadQuestionList()" class="mt-2 text-line hover:underline">ลองใหม่</button>
+                    </div>
+                `;
+            }
+        }
+
+        // ========== EDIT QUESTION ==========
+        async function editExistingQuestion(id) {
+            // Find question in cache or fetch
+            let question = allQuestions.find(q => q.id === id);
+            
+            if (!question) {
+                const response = await fetch(`${API_ENDPOINT}?action=getQuestions&category=all`);
+                const questions = await response.json();
+                question = questions.find(q => q.id === id);
+            }
+            
+            if (!question) {
+                showToast('❌ ไม่พบข้อสอบที่ต้องการแก้ไข', 'error');
+                return;
+            }
+            
+            // Switch to create tab with this question
+            switchTab('create');
+            
+            // Clear existing
+            document.getElementById('questionsContainer').innerHTML = '';
+            questionCounter = 0;
+            
+            // Set category
+            document.getElementById('categorySelect').value = question.category;
+            
+            // Add question card with data
+            addQuestionCard({
+                id: question.id,
+                question: question.question,
+                option1: question.option1,
+                option2: question.option2,
+                option3: question.option3,
+                option4: question.option4,
+                correct: question.correct,
+                displayType: question.displayType,
+                limitPerSession: question.limitPerSession
+            });
+            
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+            showToast('📝 กำลังแก้ไขข้อสอบ', 'info');
+        }
+
+        // ========== TOGGLE STATUS ==========
+        async function toggleStatus(id, currentStatus) {
+            const newStatus = currentStatus === 'active' ? 'inactive' : 'active';
+            
+            try {
+                const params = new URLSearchParams({
+                    action: 'toggleQuestionStatus',
+                    questionId: id,
+                    status: newStatus
+                });
+                
+                const response = await fetch(`${API_ENDPOINT}?${params.toString()}`);
+                const result = await response.json();
+                
+                if (result.success) {
+                    showToast(`✅ ${newStatus === 'active' ? 'เปิด' : 'ปิด'}ใช้งานข้อสอบเรียบร้อย`, 'success');
+                    await loadQuestionList();
+                    await loadCategories(); // Refresh question count
+                } else {
+                    throw new Error(result.message);
+                }
+            } catch (error) {
+                showToast('❌ เกิดข้อผิดพลาด: ' + error.message, 'error');
+            }
+        }
+
+        // ========== DELETE ==========
+        async function deleteById(id) {
+            if (!confirm('คุณแน่ใจหรือไม่ที่จะลบข้อสอบนี้?\nการกระทำนี้ไม่สามารถย้อนกลับได้')) return;
+            
+            showToast('⏳ กำลังลบ...', 'info');
+            
+            try {
+                const params = new URLSearchParams({
+                    action: 'deleteQuestion',
+                    questionId: id
+                });
+                
+                const response = await fetch(`${API_ENDPOINT}?${params.toString()}`);
+                const result = await response.json();
+                
+                if (result.success) {
+                    showToast('✅ ลบข้อสอบเรียบร้อย', 'success');
+                    await loadQuestionList();
+                    await loadCategories();
+                } else {
+                    throw new Error(result.message);
+                }
+            } catch (error) {
+                showToast('❌ เกิดข้อผิดพลาด: ' + error.message, 'error');
+            }
+        }
+
+        // ========== START ==========
+        window.addEventListener('DOMContentLoaded', initApp);
+
+        // Refresh when tab becomes visible again
+        document.addEventListener('visibilitychange', () => {
+            if (document.visibilityState === 'visible' && isAdmin) {
+                loadCategories();
+                if (!document.getElementById('tabManage').classList.contains('hidden')) {
+                    loadQuestionList();
+                }
+            }
+        });
+    </script>
+</body>
+</html>
